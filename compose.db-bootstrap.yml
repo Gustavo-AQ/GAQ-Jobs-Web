@@ -1,0 +1,31 @@
+# Opcional: inicializacao manual. Nunca faz parte do deploy normal.
+x-pg-common: &pg-common
+  image: postgres:18-alpine
+  restart: "no"
+  environment:
+    PGHOST: ${PGHOST:?Configure_PGHOST}
+    PGPORT: ${PGPORT:-5432}
+    PGDATABASE: ${PGDATABASE:-gaq}
+    PGUSER: ${PGUSER:?Configure_PGUSER_admin}
+    PGPASSWORD: ${PGPASSWORD:?Configure_PGPASSWORD_admin}
+  volumes:
+    - ./db:/sql:ro
+  networks:
+    - coolify
+
+services:
+  init-web:
+    <<: *pg-common
+    profiles: ["setup"]
+    entrypoint: ["psql"]
+    command: ["-v", "ON_ERROR_STOP=1", "-f", "/sql/001_auth_whodb.sql"]
+
+  init-full:
+    <<: *pg-common
+    profiles: ["full-setup"]
+    entrypoint: ["/bin/sh", "-ec"]
+    command: "psql -v ON_ERROR_STOP=1 -f /sql/000_jobs_whodb.sql && psql -v ON_ERROR_STOP=1 -f /sql/010_dictionary_whodb.sql && psql -v ON_ERROR_STOP=1 -f /sql/020_status_v2_whodb.sql && psql -v ON_ERROR_STOP=1 -f /sql/001_auth_whodb.sql"
+
+networks:
+  coolify:
+    external: true
