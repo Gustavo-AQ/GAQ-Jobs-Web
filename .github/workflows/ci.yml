@@ -24,3 +24,26 @@ jobs:
         working-directory: frontend
       - run: npm run build
         working-directory: frontend
+
+  infra:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar compose da aplicacao
+        env:
+          DATABASE_URL: postgresql+psycopg://test:test@postgres:5432/gaq
+          APP_ORIGIN: https://jobs.gaqtech.dev
+          SESSION_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+        run: docker compose -f compose.yaml config --quiet
+      - name: Validar composes de bootstrap
+        env:
+          PGHOST: db
+          PGUSER: postgres
+          PGPASSWORD: example_only
+          LOCAL_DB_PASSWORD: example_only
+        run: |
+          docker compose -f compose.db-bootstrap.yml --profile setup config --quiet
+          docker compose -f compose.db-bootstrap.yml --profile full-setup config --quiet
+          docker compose -f compose.db-local.yml config --quiet
+      - name: Validar workflow n8n
+        run: python -m json.tool n8n/GAQ_Jobs_MCP_importar.json > /dev/null
