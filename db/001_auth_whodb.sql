@@ -46,7 +46,7 @@ BEGIN
     ON empregos.web_login_tentativas(email,criado_em DESC);
 
   REVOKE ALL ON empregos.web_usuarios, empregos.web_sessoes, empregos.web_login_tentativas FROM PUBLIC;
-  REVOKE ALL ON ALL SEQUENCES IN SCHEMA empregos FROM PUBLIC;
+  -- Nao alterar grants PUBLIC das sequencias legadas do schema empregos.
   GRANT CONNECT ON DATABASE gaq TO gaq_jobs_web;
   GRANT USAGE ON SCHEMA empregos TO gaq_jobs_web;
 
