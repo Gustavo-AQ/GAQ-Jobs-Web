@@ -71,6 +71,7 @@ export default function App() {
   const [auth,setAuth]=useState<Auth|null>(null)
   const [checking,setChecking]=useState(true)
   const [collapsed,setCollapsed]=useState(false)
+  const [filtersOpen,setFiltersOpen]=useState(false)
   const [tab,setTab]=useState<Categoria>('all')
   const [term,setTerm]=useState('')
   const [model,setModel]=useState('')
@@ -198,7 +199,7 @@ export default function App() {
       </nav>
       <div className="side-footer">
         {!collapsed&&<div className="user-email" title={auth.usuario.email}>{auth.usuario.email}</div>}
-        <button title="Sair" onClick={()=>void logout()}><span className="nav-icon">↪</span>{!collapsed&&'Sair'}</button>
+        <button title="Sair" aria-label="Sair da conta" onClick={()=>void logout()}><span className="nav-icon">↪</span>{!collapsed&&'Sair'}</button>
       </div>
     </aside>
     <main className="content">
@@ -216,6 +217,10 @@ export default function App() {
           <input aria-label="Buscar vagas" placeholder="Buscar cargo, empresa ou tecnologia..." value={term} onChange={e=>filterChanged(setTerm,e.target.value)} />
           <button className="soft-button" onClick={reset}>Limpar filtros</button>
         </div>
+        <button className="mobile-filter-toggle" type="button" aria-expanded={filtersOpen} aria-controls="gaq-filter-fields" onClick={()=>setFiltersOpen(v=>!v)}>
+          <span>{filtersOpen?'Ocultar filtros':'Mostrar filtros'}</span><span aria-hidden="true">{filtersOpen?'−':'+'}</span>
+        </button>
+        <div id="gaq-filter-fields" className={"filter-fields "+(filtersOpen?"filter-fields-open":"")}>
         <div className="filter-grid">
           <label>Modalidade<select value={model} onChange={e=>filterChanged(setModel,e.target.value)}>
             <option value="">Todas</option><option value="REMOTO">Remoto</option>
@@ -240,6 +245,7 @@ export default function App() {
           <label>Data inicial<input type="date" value={start} onChange={e=>filterChanged(setStart,e.target.value)} /></label>
           <label>Data final<input type="date" value={end} onChange={e=>filterChanged(setEnd,e.target.value)} /></label>
         </div>}
+        </div>
       </section>
       <div className="list-title">
         <h2>{tab==='all'?'Todas as vagas':tab==='new'?'Oportunidades para avaliar':'Candidaturas'}</h2>
