@@ -1,0 +1,118 @@
+{
+  "name": "GAQ Jobs | MCP Grok ↔ PostgreSQL",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "gaq-jobs-fe5ae1ce71bb",
+        "authentication": "bearerAuth"
+      },
+      "id": "7732246f-ecaa-4dd0-99b5-390d4d2a7a4d",
+      "name": "GAQ Jobs - MCP Server Trigger",
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        40
+      ],
+      "webhookId": "74c8fbcb-8126-4856-b5bd-f57dcb6d13db"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT empregos.mcp_salvar_vaga($1::jsonb) AS resultado;",
+        "options": {
+          "queryReplacement": "={{ [ $fromAI('vaga_json', 'JSON em UMA string valida: fonte,url,empresa,cargo obrigatorios; preencha os campos conhecidos sem inventar dados.', 'string') ] }}"
+        },
+        "descriptionType": "manual",
+        "toolDescription": "Salva uma vaga ou reencontra duplicata. Exige JSON string com fonte, url, empresa, cargo; opcionais: id_externo, url_canonica, descricao, nivel, modelo (REMOTO|HIBRIDO|PRESENCIAL|NAO_INFORMADO), cidade, uf, pais, tipo_contrato, salario_min, salario_max, moeda, aderencia (0-100), score_prefiltro (0-100), habilidades_pedidas, o_que_falta, como_candidatar, prazo (AAAA-MM-DD), data_publicacao (AAAA-MM-DD). Nao inclui status: banco inicia NOVA. Retorno tem vaga_id. Antes de anunciar vaga, use consultar_vagas para verificar existencia."
+      },
+      "id": "4c2d895b-b981-4c55-9d4a-34901c5b4182",
+      "name": "salvar_vaga",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -60,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT empregos.mcp_consultar_vagas($1::jsonb) AS resultado;",
+        "options": {
+          "queryReplacement": "={{ [ $fromAI('filtros_json', 'JSON em UMA string valida com os filtros. Para todas as vagas use {}.', 'string') ] }}"
+        },
+        "descriptionType": "manual",
+        "toolDescription": "Consulta vagas no GAQ Jobs. Recebe uma string JSON com filtros opcionais: id, termo, fonte, modelo, nivel, status (NOVA, ENVIADA, INSCRITO ou outros de candidatura), aderencia_min, apenas_nao_enviadas, limite (max 50), offset. Para buscar vagas ainda nao comunicadas, use apenas_nao_enviadas=true. Nao envia mensagens e nao altera banco."
+      },
+      "id": "c695da12-6f61-4c1f-b60e-d82287c6d8c9",
+      "name": "consultar_vagas",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        220,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT empregos.mcp_atualizar_status($1::jsonb) AS resultado;",
+        "options": {
+          "queryReplacement": "={{ [ $fromAI('status_json', 'JSON em UMA string valida: vaga_id numero e status NOVA|ENVIADA|INSCRITO; INSCRITO requer confirmacao=true e comprovante_inscricao.', 'string') ] }}"
+        },
+        "descriptionType": "manual",
+        "toolDescription": "Atualiza APENAS status NOVA (idempotente, sem retroceder), ENVIADA (so depois de informar ao usuario), INSCRITO (so APOS CONFIRMACAO REAL DO PORTAL). Recebe JSON string com vaga_id, status; para INSCRITO exige confirmacao=true e comprovante_inscricao contendo mensagem/numero/prova de sucesso. Nao marcar INSCRITO por tentativa ou formulario preenchido. Nao pode alterar entrevista, oferta ou outros estados pessoais. Resposta com acao e status reais."
+      },
+      "id": "f962835a-5de9-442f-a2a1-53053a1ee8d1",
+      "name": "atualizar_status_vaga",
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        500,
+        320
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "salvar_vaga": {
+      "ai_tool": [
+        [
+          {
+            "node": "GAQ Jobs - MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_vagas": {
+      "ai_tool": [
+        [
+          {
+            "node": "GAQ Jobs - MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "atualizar_status_vaga": {
+      "ai_tool": [
+        [
+          {
+            "node": "GAQ Jobs - MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": []
+}
