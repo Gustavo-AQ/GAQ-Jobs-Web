@@ -1,0 +1,58 @@
+# NOVO: PostgreSQL externo existente + migração condicional + API + web.
+# Não altera o compose.yaml ativo na Oracle.
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: migrator/Dockerfile
+    restart: "no"
+    environment:
+      PGHOST: ${GAQ_DB_HOST:?Configure_HOST_INTERNO}
+      PGPORT: ${GAQ_DB_PORT:-5432}
+      PGDATABASE: ${GAQ_DB_NAME:-gaq}
+      PGUSER: ${GAQ_DB_ADMIN_USER:?Configure_USUARIO_MIGRADOR}
+      PGPASSWORD: ${GAQ_DB_ADMIN_PASSWORD:?Configure_SENHA_MIGRADOR}
+      GAQ_SCHEMA_MODE: ${GAQ_SCHEMA_MODE:-apply}
+      GAQ_DB_WEB_INITIAL_PASSWORD: ${GAQ_DB_WEB_INITIAL_PASSWORD:-}
+      GAQ_DB_GROK_INITIAL_PASSWORD: ${GAQ_DB_GROK_INITIAL_PASSWORD:-}
+    networks:
+      - coolify
+
+  api:
+    build:
+      context: ./backend
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Configure_URL_DO_GAQ_JOBS_WEB}
+      APP_ORIGIN: ${APP_ORIGIN:?Configure_APP_ORIGIN}
+      SESSION_SECRET: ${SESSION_SECRET:?Configure_SESSION_SECRET}
+      COOKIE_SECURE: "true"
+      SESSION_HOURS: ${SESSION_HOURS:-72}
+    networks:
+      - default
+      - coolify
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=4)"]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+      start_period: 20s
+
+  web:
+    build:
+      context: ./frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - default
+    expose:
+      - "80"
+
+networks:
+  coolify:
+    external: true
