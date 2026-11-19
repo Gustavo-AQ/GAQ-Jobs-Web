@@ -19,6 +19,8 @@
 | Arquivo | Database `gaq` | Schema/tabelas | Web/API | Uso |
 |---|---|---|---|---|
 | `compose.yaml` | Deve existir | Devem existir | Sim | Produção da Oracle, reaproveita o banco atual |
+| `compose.managed.yaml` | Deve existir | Verifica e aplica migrações conhecidas | Sim | Nova instalação usando PostgreSQL existente |
+| `compose.standalone.yaml` | Cria automaticamente | Verifica e aplica migrações conhecidas | Sim | Instalação independente com banco persistente |
 | `compose.db-bootstrap.yml` | Deve existir | Cria/atualiza via SQL | Não | Bootstrap manual em PostgreSQL existente |
 | `compose.db-local.yml` | Cria automaticamente | Cria na primeira inicialização do volume | Não | Laboratório isolado, não é o deploy de produção |
 
