@@ -21,6 +21,10 @@ Verifique:
 
 Novas tabelas: web_usuarios, web_sessoes, web_login_tentativas.
 
+Documentação técnica complementar: [Banco de dados, tabelas e regras](BANCO_DE_DADOS.md) e [diagrama ER](DIAGRAMA_ER.md).
+
+**Importante:** `compose.db-bootstrap.yml` conecta ao database `gaq` existente e instala somente objetos SQL; **não cria o database e não inicia a interface web**. Para criar o database do zero, utilize o PostgreSQL do Coolify ou `compose.db-local.yml` (laboratório).
+
 ## 2. Compose opcional de tabelas
 
 O arquivo compose.db-bootstrap.yml NÃO é utilizado no deploy do site. Ele é executado manualmente quando necessário, usando um PostgreSQL de administração e a rede privada Docker coolify.
