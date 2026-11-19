@@ -37,6 +37,8 @@ Em um banco já utilizado com vagas, **não** execute novamente a cadeia complet
 
 Comandos e instruções de rede, credenciais e Coolify: [INSTALACAO.md](INSTALACAO.md).
 
+**Novos Compose condicionais:** consulte [INSTALACAO_CONDICIONAL.md](INSTALACAO_CONDICIONAL.md). Eles criam, além das cinco tabelas de dados da aplicação, uma tabela técnica `empregos.schema_migrations` que registra versão, SHA-256, data e origem da migração; não se trata de uma tabela de negócio.
+
 ## 3. Tabela `empregos.vagas`
 
 Registro central da oportunidade; chave primária `id BIGINT GENERATED ALWAYS AS IDENTITY`.
