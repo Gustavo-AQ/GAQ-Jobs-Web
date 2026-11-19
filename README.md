@@ -1,12 +1,20 @@
 # GAQ Jobs Web
 
-Painel privado de vagas e candidaturas da GAQ CLOUD, no ar em [https://jobs.gaqtech.dev](https://jobs.gaqtech.dev).
+Painel privado de vagas e candidaturas da GAQ CLOUD, no ar em [https://jobs.gaqtech.dev](https://jobs.gaqtech.dev). O coletor e o pré-filtro agilizam a busca de vagas e reduzem de forma eficaz o gasto de tokens com IA.
 
 Situação: **em produção**.
 
 Stack: React + TypeScript + Vite, FastAPI, PostgreSQL 18 (schema `empregos`) e Docker Compose (Coolify). O assistente de IA grava e consulta o mesmo banco por meio do n8n/MCP, com as ferramentas `salvar_vaga`, `consultar_vagas`, `atualizar_status_vaga` e `descrever_banco`. Cada vaga tem três famílias de status auditáveis: `NOTIFICACAO`, `CANDIDATURA` e `DISPONIBILIDADE`.
 
 O fluxo antigo chamado **Pipeline de Análise de Vagas com IA** (WhatsApp e Google Sheets) e qualquer menção a Whisper ou Telegram são um sistema separado, legado. Não fazem parte deste painel, do coletor nem do pré-filtro.
+
+## Por que o coletor? Menos tokens, mais velocidade
+
+O coletor busca vagas automaticamente em várias fontes (APIs e páginas públicas, sem IA). O pré-filtro elimina, por regras simples e editáveis, o que não serve — nível sênior, local fora do estado, idioma eliminatório, horário noturno, duplicadas etc. Só as vagas que sobram chegam à análise com IA. Resultado: busca mais rápida e muito menos tokens gastos.
+
+Em uma execução: 1.235 vagas coletadas e 246 aprovadas pelo pré-filtro para a análise com IA, ou seja, cerca de 80% descartadas sem gastar nenhum token.
+
+Esse caminho está no diagrama da seção [Pipeline](#pipeline); a lista de fontes está em [docs/FONTES.md](docs/FONTES.md).
 
 ## Pipeline
 
