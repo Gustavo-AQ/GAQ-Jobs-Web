@@ -1,0 +1,135 @@
+[
+  {
+    "fonte": "exemplo",
+    "autor": "Recrutadora Exemplo",
+    "data": "2026-11-10",
+    "url": "https://exemplo.local/vagas/python-ia-junior-remoto",
+    "texto": "Vaga: Desenvolvedor Python Júnior (IA Generativa) — 100% remoto, Brasil. Buscamos alguém para criar assistentes e fluxos com OpenAI API, LangChain e FastAPI, além de APIs REST e JSON Schema. Salário: R$ 3.000 CLT. Como se candidatar: envie seu currículo para vagas@exemplo.local. Este é um anúncio fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo SP",
+    "data": "2026-11-11",
+    "url": "https://exemplo.local/vagas/backend-pleno-inicial-sp",
+    "texto": "Oportunidade de Desenvolvedor Backend Pleno inicial, modelo híbrido em São Paulo/SP. Stack: Python, FastAPI, SQL, MariaDB, Docker e AWS. Requisitos: experiência com APIs REST e Linux. Faixa salarial de R$ 2.500 a R$ 4.000. Vaga fictícia de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Pessoa Exemplo",
+    "data": "2026-11-12",
+    "url": "https://exemplo.local/vagas/rpa-junior-remoto",
+    "texto": "Vaga de Analista de Automação (RPA) Júnior, remoto. Atuação com n8n, Python e webhooks para automatizar integrações. Nível júnior, sem salário informado no post. Texto fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Candidato Exemplo",
+    "data": "2026-11-12",
+    "url": "https://exemplo.local/posts/open-to-work",
+    "texto": "Olá, rede! Estou em busca de uma vaga júnior em Python e IA. #OpenToWork e disponível para novas oportunidades, preferência remoto. Segue meu currículo. Post fictício de exemplo — não é uma oferta de emprego."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Tech Recruiter Exemplo",
+    "data": "2026-11-13",
+    "url": "https://exemplo.local/vagas/senior-tech-lead",
+    "texto": "Vaga: Engenheiro de Software Sênior / Tech Lead. 100% remoto. Python, IA generativa, LangChain e AWS. Buscamos um especialista com ampla experiência para liderar o time. Anúncio fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo Sul",
+    "data": "2026-11-13",
+    "url": "https://exemplo.local/vagas/python-junior-curitiba",
+    "texto": "Desenvolvedor Python Júnior, modelo híbrido em Curitiba/PR. Stack com Python, FastAPI e Docker. Requisitos: curso superior em andamento. Vaga fictícia de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Programa Exemplo",
+    "data": "2026-11-14",
+    "url": "https://exemplo.local/vagas/trainee-dados-1500",
+    "texto": "Trainee em dados, 100% remoto. Atuação com Python, SQL e pandas. Salário de R$ 1.500 (ou 1,5k) mensais. Requisitos: formação em andamento. Anúncio fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Escola Exemplo",
+    "data": "2026-11-14",
+    "url": "https://exemplo.local/cursos/python-ia",
+    "texto": "Garanta sua vaga no curso de Python e IA Generativa! Inscreva-se na turma, aula ao vivo e curso com certificado. Vagas para a turma de dezembro. Anúncio fictício de exemplo — não é uma vaga de emprego."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Recrutadora Exemplo",
+    "data": "2026-11-10",
+    "url": "https://exemplo.local/vagas/python-ia-junior-remoto",
+    "texto": "Vaga: Desenvolvedor Python Júnior (IA Generativa) — 100% remoto, Brasil. Buscamos alguém para criar assistentes e fluxos com OpenAI API, LangChain e FastAPI, além de APIs REST e JSON Schema. Salário: R$ 3.000 CLT. Como se candidatar: envie seu currículo para vagas@exemplo.local. Este é um anúncio fictício de exemplo (duplicata proposital)."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Loja Exemplo",
+    "data": "2026-11-15",
+    "url": "https://exemplo.local/vagas/vendedor-junior-sp",
+    "texto": "Vaga de vendedor de software júnior, presencial em São Paulo. Atendimento a clientes, meta mensal e fechamento de contratos. Sem requisitos de programação. Anúncio fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo Idioma",
+    "data": "2026-11-18",
+    "url": "https://exemplo.local/vagas/python-junior-remoto-espanhol-obrigatorio",
+    "texto": "Estamos contratando Desenvolvedor Python Júnior para o time de integrações, 100% remoto no Brasil. Você vai construir APIs com FastAPI e JSON Schema, além de fluxos com webhooks. Requisitos: espanhol fluente obrigatório, porque o cliente é da América Latina. Salário: R$ 3.000 CLT. Anúncio fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo Idioma Plus",
+    "data": "2026-11-18",
+    "url": "https://exemplo.local/vagas/python-junior-remoto-espanhol-diferencial",
+    "texto": "Oportunidade de Desenvolvedor Python Júnior (IA Generativa), trabalho remoto. Atuação com LangChain, OpenAI API e assistentes de IA. Espanhol é um diferencial. Faixa salarial de R$ 3.000 CLT. Como se candidatar: envie seu currículo. Texto fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo Noturno",
+    "data": "2026-11-18",
+    "url": "https://exemplo.local/vagas/python-junior-remoto-turno-noturno",
+    "texto": "Vaga noturna de backend: Desenvolvedor Python Júnior 100% remoto para monitorar automações n8n e pipelines em Docker. Atuação em turno noturno, com plantão de incidentes. Salário: R$ 3.200 CLT. Anúncio fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo 20h",
+    "data": "2026-11-18",
+    "url": "https://exemplo.local/vagas/python-junior-remoto-ate-20h",
+    "texto": "Contratação de pessoa desenvolvedora Python Júnior, modelo remoto, para o produto de dados da empresa. Stack principal: Python, pandas e SQL. Horário de trabalho das 9h às 20h, com alinhamento diário no fim do expediente. Remuneração de R$ 3.100 mensais. Vaga fictícia de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo 18h",
+    "data": "2026-11-18",
+    "url": "https://exemplo.local/vagas/python-junior-remoto-ate-18h",
+    "texto": "Buscamos um Desenvolvedor Júnior em Python e FastAPI para manter microserviços na AWS, 100% remoto. Horário de trabalho das 9h às 18h, jornada comercial clássica. Benefícios CLT e salário de R$ 3.400. Post fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo Horário Aberto",
+    "data": "2026-11-18",
+    "url": "https://exemplo.local/vagas/python-junior-remoto-horario-a-combinar",
+    "texto": "Abertura de vaga para Dev Python Júnior remoto, focada em agentes de IA e MCP. Horário a combinar com o time, sem turno definido no anúncio. Salário: R$ 3.000 PJ negociável. Anúncio fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo Campinas",
+    "data": "2026-11-18",
+    "url": "https://exemplo.local/vagas/python-junior-hibrido-campinas",
+    "texto": "Desenvolvedor Python Júnior para o escritório de Campinas/SP, modelo híbrido (2 dias no escritório). Stack: Python, FastAPI, Docker e Linux. Salário: R$ 3.000 CLT. Vaga fictícia de exemplo para o interior do estado."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo Presencial Sem Cidade",
+    "data": "2026-11-18",
+    "url": "https://exemplo.local/vagas/python-junior-presencial-sem-cidade",
+    "texto": "Estamos em busca de um Desenvolvedor Python Júnior, modelo presencial. O anúncio não informa cidade nem estado. Trabalho com Python, FastAPI, Docker e APIs REST. Salário: R$ 3.000 CLT. Texto fictício de exemplo."
+  },
+  {
+    "fonte": "exemplo",
+    "autor": "Empresa Exemplo Estudo Noturno",
+    "data": "2026-11-18",
+    "url": "https://exemplo.local/vagas/python-junior-hibrido-estuda-noturno",
+    "texto": "Programa de Desenvolvedor Python Júnior, modelo híbrido em São Paulo, para quem está na faculdade. Requisitos: estar cursando faculdade no período noturno. Stack: Python, FastAPI e Git. Salário: R$ 3.000 CLT. Anúncio fictício de exemplo."
+  }
+]

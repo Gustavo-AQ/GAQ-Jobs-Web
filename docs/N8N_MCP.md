@@ -2,7 +2,7 @@
 
 Arquivo: n8n/GAQ_Jobs_MCP_importar.json.
 
-Esse arquivo é um workflow NOVO e independente, com caminho gaq-jobs-web-v1. Não substitui o workflow do Grok já funcional nem o bot de Whisper/Telegram.
+Esse arquivo é um workflow independente. O caminho do webhook no n8n é `gaq-jobs-web-v1` (é o path do trigger, não a branch Git; o deploy do painel usa `main`). Não substitui o fluxo legado "Pipeline de Análise de Vagas com IA" (WhatsApp e Google Sheets) nem um bot antigo de Whisper/Telegram: esses fluxos são separados deste painel.
 
 ## Quatro ferramentas
 
