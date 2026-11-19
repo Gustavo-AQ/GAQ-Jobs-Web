@@ -1,0 +1,83 @@
+# NOVO: PostgreSQL 18 persistente + migrações + API + web.
+# Instância INDEPENDENTE. Nunca use sobre o banco gaq já existente sem planejar dados/DNS.
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: gaq
+      POSTGRES_PASSWORD: ${GAQ_DB_ADMIN_PASSWORD:?Configure_SENHA_POSTGRES}
+    volumes:
+      - gaq_jobs_pgdata:/var/lib/postgresql
+    networks:
+      - private_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gaq"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  migrate:
+    build:
+      context: .
+      dockerfile: migrator/Dockerfile
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGDATABASE: gaq
+      PGUSER: postgres
+      PGPASSWORD: ${GAQ_DB_ADMIN_PASSWORD:?Configure_SENHA_POSTGRES}
+      GAQ_SCHEMA_MODE: ${GAQ_SCHEMA_MODE:-apply}
+      GAQ_DB_WEB_INITIAL_PASSWORD: ${GAQ_DB_WEB_PASSWORD:?Configure_SENHA_WEB}
+      GAQ_DB_GROK_INITIAL_PASSWORD: ${GAQ_DB_GROK_PASSWORD:?Configure_SENHA_MCP}
+    networks:
+      - private_db
+
+  api:
+    build:
+      context: ./backend
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      # GAQ_DB_WEB_PASSWORD deve usar caracteres URL-safe (alfanuméricos recomendado).
+      DATABASE_URL: postgresql+psycopg://gaq_jobs_web:${GAQ_DB_WEB_PASSWORD:?Configure_SENHA_WEB}@db:5432/gaq
+      APP_ORIGIN: ${APP_ORIGIN:?Configure_DOMINIO_PUBLICO}
+      SESSION_SECRET: ${SESSION_SECRET:?Configure_SESSION_SECRET}
+      COOKIE_SECURE: "true"
+      SESSION_HOURS: ${SESSION_HOURS:-72}
+    networks:
+      - default
+      - private_db
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=4)"]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+      start_period: 20s
+
+  web:
+    build:
+      context: ./frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - default
+    expose:
+      - "80"
+
+volumes:
+  gaq_jobs_pgdata:
+
+networks:
+  private_db:
+    internal: true

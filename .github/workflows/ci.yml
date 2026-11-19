@@ -59,6 +59,19 @@ jobs:
           docker compose -f compose.db-bootstrap.yml --profile setup config --quiet
           docker compose -f compose.db-bootstrap.yml --profile full-setup config --quiet
           docker compose -f compose.db-local.yml config --quiet
+      - name: Validar novos composes
+        env:
+          DATABASE_URL: postgresql+psycopg://test:test@postgres:5432/gaq
+          APP_ORIGIN: https://jobs.gaqtech.dev
+          SESSION_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+          GAQ_DB_HOST: postgres
+          GAQ_DB_ADMIN_USER: postgres
+          GAQ_DB_ADMIN_PASSWORD: example_only
+          GAQ_DB_WEB_PASSWORD: local_web_password_abcdefghijklmnopqrstuvwxyz
+          GAQ_DB_GROK_PASSWORD: local_grok_password_abcdefghijklmnopqrstuvwxyz
+        run: |
+          docker compose -f compose.managed.yaml config --quiet
+          docker compose -f compose.standalone.yaml config --quiet
       - name: Validar workflow n8n
         run: python -m json.tool n8n/GAQ_Jobs_MCP_importar.json > /dev/null
 
@@ -94,3 +107,68 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f db/001_auth_whodb.sql
           psql -v ON_ERROR_STOP=1 -c "SELECT empregos.mcp_descrever_schema();"
           psql -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM empregos.web_usuarios;"
+
+  schema-migrator:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: gaq
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: example_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d gaq"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 8
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: example_only
+      PGDATABASE: gaq
+      GAQ_SCHEMA_MODE: apply
+      GAQ_DB_WEB_INITIAL_PASSWORD: local_web_password_abcdefghijklmnopqrstuvwxyz
+      GAQ_DB_GROK_INITIAL_PASSWORD: local_grok_password_abcdefghijklmnopqrstuvwxyz
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Instalar dependencias do migrador
+        run: pip install -r migrator/requirements.txt
+      - name: Bootstrap completo em PostgreSQL vazio
+        run: python migrator/ensure.py
+      - name: Inserir uma vaga e conferir migracoes
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "INSERT INTO empregos.vagas(fonte,url,url_canonica,empresa,cargo) VALUES ('CI','https://example.org/job','https://example.org/job','Example','CI test');"
+          psql -v ON_ERROR_STOP=1 -c "SELECT version,origin FROM empregos.schema_migrations ORDER BY version;"
+      - name: Reexecutar sem apagar a vaga
+        run: |
+          python migrator/ensure.py
+          test "$(psql -At -c "SELECT count(*) FROM empregos.vagas WHERE fonte='CI'")" = "1"
+      - name: Verificacao sem alteracoes
+        env:
+          GAQ_SCHEMA_MODE: check
+        run: python migrator/ensure.py
+      - name: Alteracao de tipo incompatível deve bloquear migrador
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "ALTER TABLE empregos.vagas ALTER COLUMN nivel TYPE VARCHAR(50);"
+          if python migrator/ensure.py; then
+            echo "ERRO: alteracao de schema nao foi detectada"
+            exit 1
+          fi
+          test "$(psql -At -c "SELECT count(*) FROM empregos.vagas WHERE fonte='CI'")" = "1"
+
+      - name: Simular upgrade de banco antigo sem status v2 e sem tabelas web
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "DROP SCHEMA empregos CASCADE;"
+          psql -v ON_ERROR_STOP=1 -f db/000_jobs_whodb.sql
+          psql -v ON_ERROR_STOP=1 -f db/010_dictionary_whodb.sql
+          python migrator/ensure.py
+          test "$(psql -At -c "SELECT to_regclass('empregos.web_sessoes') IS NOT NULL")" = "t"
+          test "$(psql -At -c "SELECT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='empregos.vagas_status_hist'::regclass AND pg_get_constraintdef(oid) LIKE '%DISPONIBILIDADE%')")" = "t"
+          psql -v ON_ERROR_STOP=1 -c "SELECT version, origin FROM empregos.schema_migrations ORDER BY version;"

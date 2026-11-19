@@ -19,6 +19,8 @@
 | Arquivo | Database `gaq` | Schema/tabelas | Web/API | Uso |
 |---|---|---|---|---|
 | `compose.yaml` | Deve existir | Devem existir | Sim | Produção da Oracle, reaproveita o banco atual |
+| `compose.managed.yaml` | Deve existir | Verifica e aplica migrações conhecidas | Sim | Nova instalação usando PostgreSQL existente |
+| `compose.standalone.yaml` | Cria automaticamente | Verifica e aplica migrações conhecidas | Sim | Instalação independente com banco persistente |
 | `compose.db-bootstrap.yml` | Deve existir | Cria/atualiza via SQL | Não | Bootstrap manual em PostgreSQL existente |
 | `compose.db-local.yml` | Cria automaticamente | Cria na primeira inicialização do volume | Não | Laboratório isolado, não é o deploy de produção |
 
@@ -34,6 +36,8 @@ Ordem de execução completa:
 Em um banco já utilizado com vagas, **não** execute novamente a cadeia completa de maneira indiscriminada; faça backup e avalie cada migração. Os scripts usam `IF NOT EXISTS` em várias tabelas, mas também recriam funções e triggers. Para instalar somente autenticação web numa instância com as tabelas de vagas corretas, execute apenas `001_auth_whodb.sql`.
 
 Comandos e instruções de rede, credenciais e Coolify: [INSTALACAO.md](INSTALACAO.md).
+
+**Novos Compose condicionais:** consulte [INSTALACAO_CONDICIONAL.md](INSTALACAO_CONDICIONAL.md). Eles criam, além das cinco tabelas de dados da aplicação, uma tabela técnica `empregos.schema_migrations` que registra versão, SHA-256, data e origem da migração; não se trata de uma tabela de negócio.
 
 ## 3. Tabela `empregos.vagas`
 

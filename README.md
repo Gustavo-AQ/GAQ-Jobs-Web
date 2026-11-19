@@ -40,7 +40,9 @@ O pré-filtro corta o que claramente não serve (nível, idioma obrigatório, ho
 
 ## Arquivos
 
-- `compose.yaml`: produção; apenas web e API.
+- `compose.yaml`: produção atual da GAQ; apenas web e API (**não foi modificado**).
+- `compose.managed.yaml`: site + API + migração/verificação condicional usando PostgreSQL existente.
+- `compose.standalone.yaml`: PostgreSQL 18 persistente + migrador condicional + site e API.
 - `compose.db-bootstrap.yml`: inicialização SQL opcional contra um banco PostgreSQL existente.
 - `compose.db-local.yml`: PostgreSQL isolado para laboratório.
 - `db/`: instaladores de tabelas, migração v2 e autenticação local.
@@ -48,6 +50,7 @@ O pré-filtro corta o que claramente não serve (nível, idioma obrigatório, ho
 - `coletor/`: coleta HTTP sem login. Config de exemplo em `config.example.json`; `GITHUB_TOKEN` opcional em `coletor/.env.example`.
 - `prefiltro/`: descarte e nota antes do assistente. Filtros eliminatórios editáveis no config de exemplo.
 - `docs/INSTALACAO.md`: instruções completas para Coolify e PostgreSQL.
+- `docs/INSTALACAO_CONDICIONAL.md`: guia dos dois novos Compose com migrações seguras, variáveis, operação e diagnóstico.
 - `docs/BANCO_DE_DADOS.md`: dicionário técnico das cinco tabelas, chaves, regras, permissões, funções MCP e auditoria.
 - `docs/DIAGRAMA_ER.md`: diagrama Mermaid dos relacionamentos e arquitetura de acesso ao PostgreSQL.
 - `docs/USO.md`: guia do painel.
