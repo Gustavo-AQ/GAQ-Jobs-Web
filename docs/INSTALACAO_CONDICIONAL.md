@@ -70,6 +70,8 @@ python -m app.create_admin --email endereco@exemplo.com
 
 O serviço `migrate` termina após a verificação; não deve permanecer em execução como daemon.
 
+**Atenção a reimplantações:** `depends_on: service_completed_successfully` garante a ordem quando a tarefa é executada, mas **não obriga o Docker Compose a recriar um container `migrate` já concluído**. Para auditar/aplicar mudanças em uma implantação existente, execute explicitamente a tarefa novamente ou recrie esse serviço como parte do processo de atualização. Por exemplo, no host com as mesmas variáveis privadas do projeto, `docker compose -f compose.managed.yaml run --rm migrate`. Não presuma que todo Redeploy de frontend executou uma nova verificação do banco.
+
 ## 4. Opção B — Instalação independente: `compose.standalone.yaml`
 
 Crie uma nova aplicação Docker Compose no Coolify com o arquivo `/compose.standalone.yaml`. Ele cria, em rede Docker privada:
