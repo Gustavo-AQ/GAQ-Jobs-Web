@@ -14,7 +14,11 @@ from psycopg import sql
 from psycopg.rows import dict_row
 
 LOG = logging.getLogger("gaq-schema")
-SQL_ROOT = Path(__file__).parent / "sql"
+# Docker uses /opt/gaq/sql; running from the repository uses ../db.
+_DEFAULT_SQL_DIR = Path(__file__).parent / "sql"
+SQL_ROOT = Path(os.getenv("GAQ_SQL_DIR", str(
+    _DEFAULT_SQL_DIR if _DEFAULT_SQL_DIR.is_dir() else Path(__file__).parent.parent / "db"
+)))
 SCRIPTS = {
     "base": "000_jobs_whodb.sql",
     "dictionary": "010_dictionary_whodb.sql",
