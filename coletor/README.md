@@ -35,7 +35,7 @@ A fonte `backendbr` chama `https://api.github.com`. Sem token o limite é **60 r
 - `keywords` — termos de busca. Padrão: python, desenvolvedor python, backend, dados, automação, rpa, n8n, ia, devops, qa automação.
 - `fontes` — quais coletores rodar. Padrão: `gupy`, `himalayas`, `infojobs`, `catho`, `vagas`, `nerdin`, `backendbr`, `programathor`, `remotar`.
 - `backendbr_paginas` — páginas da API do GitHub (100 issues por página). Padrão 1, para respeitar o limite de 60 req/h sem token. Com `GITHUB_TOKEN`, o limite autenticado vale, mas o padrão continua 1.
-- `filtro_local.remoto` / `filtro_local.sao_paulo` — quando a fonte aceita filtro, busca remoto e/ou São Paulo (estado). Vaga sem local informado não é descartada aqui; isso fica a cargo do pré-filtro.
+- `filtro_local.remoto` / `filtro_local.sao_paulo` — quando a fonte aceita filtro, busca remoto e/ou São Paulo (estado). Vaga sem local informado não é descartada aqui, mesmo se o modelo for híbrido ou presencial; isso fica a cargo do pré-filtro. Local explícito fora de SP, sem sinal de remoto, sai nesta etapa.
 - `max_por_busca` — teto de resultados por palavra-chave (nas APIs que paginam).
 - `max_paginas` — quantas páginas pedir em cada busca (padrão 1, para não martelar o site).
 - `atraso_segundos` — pausa entre requisições (padrão 1,2 s).

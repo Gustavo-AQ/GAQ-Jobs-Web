@@ -55,7 +55,7 @@ Depois de normalizar o texto (minúsculas, sem acento), o script aplica **regras
 3. Idioma da lista `idiomas_eliminatorios` aparece como **obrigatório**, fluente ou *required* — não como diferencial/plus. Lista vazia desliga o filtro.
 4. Turno da lista `horarios_eliminatorios` (ex.: noturno) ou jornada com término depois de `horario_limite_fim`, **somente quando o horário está explícito**. Horário desconhecido não elimina. "Estudar no período noturno" não conta como jornada noturna. Campos vazios desligam o filtro.
 5. Presencial ou híbrido fora da UF de `local_presencial` (e, se `cidades` tiver itens, fora dessas cidades). Remoto sempre passa. Sem informação de local, não elimina. `cidades` vazia aceita qualquer cidade da UF. Objeto vazio ou sem `uf` desliga o filtro.
-6. Salário (ou teto da faixa) abaixo do piso. Entende `R$ 1.500`, `1,5k`, `3k`, `2 mil`.
+6. Salário (ou teto da faixa) abaixo do piso. Entende `R$ 1.500`, `R$ 1.500 a 2.500` (o `R$` vale para os dois lados), `1,5k`, `3k`, `2 mil`.
 7. Duplicata (mesma URL, mesmo texto ou quase-duplicata por similaridade).
 
 A nota 0–100 é uma média ponderada de:

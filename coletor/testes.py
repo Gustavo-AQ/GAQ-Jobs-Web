@@ -88,6 +88,45 @@ def main() -> int:
 
     checar("backendbr" in coletor.COLETORES and "remotar" in coletor.COLETORES, "coletores registrados")
 
+    checar(coletor._passa_local("híbrido", "", "[Híbrido] Python Pleno"), "híbrido sem cidade passa")
+    checar(coletor._passa_local("presencial", "", "Python júnior presencial"), "presencial sem cidade passa")
+    checar(coletor._passa_local("", "", "Python pleno"), "sem modelo e sem local passa")
+    checar(coletor._passa_local("", "São Paulo", "Python"), "São Paulo passa")
+    checar(coletor._passa_local("remoto", "Curitiba", "Python"), "remoto passa mesmo fora de SP")
+    checar(not coletor._passa_local("híbrido", "Curitiba", "Python"), "híbrido em Curitiba sai")
+    checar(not coletor._passa_local("presencial", "Rio de Janeiro", "Python"), "presencial no Rio sai")
+
+    issue_sem_local = {
+        "title": "[Híbrido] Python Pleno",
+        "body": "Vaga de python pleno, sem seção de local.\n",
+        "html_url": "https://exemplo.local/issues/hibrido-sem-cidade",
+        "labels": [{"name": "Híbrido"}, {"name": "Pleno"}],
+        "user": {"login": "exemplo"},
+        "created_at": "2026-11-01T12:00:00Z",
+    }
+    issue_curitiba = {
+        "title": "[Presencial] Python Pleno",
+        "body": "## Localização\nCuritiba\n",
+        "html_url": "https://exemplo.local/issues/presencial-curitiba",
+        "labels": [{"name": "Presencial"}, {"name": "Pleno"}],
+        "user": {"login": "exemplo"},
+        "created_at": "2026-11-01T12:00:00Z",
+    }
+    coletor._CACHE["backendbr"] = [issue_sem_local, issue_curitiba]
+    try:
+        vagas_bb = coletor.coletar_backendbr(None, {}, "python")
+    finally:
+        coletor._CACHE.pop("backendbr", None)
+    urls_bb = {v.get("url") for v in vagas_bb}
+    checar(
+        "https://exemplo.local/issues/hibrido-sem-cidade" in urls_bb,
+        "backend-br híbrido sem local é mantido",
+    )
+    checar(
+        "https://exemplo.local/issues/presencial-curitiba" not in urls_bb,
+        "backend-br presencial em Curitiba sai",
+    )
+
     if falhas:
         print(f"\n{len(falhas)} falha(s).")
         return 1

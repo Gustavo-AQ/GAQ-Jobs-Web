@@ -244,18 +244,45 @@ def _valor_k_ou_mil(numero: str, multiplicador: int) -> float | None:
     return base * multiplicador
 
 
+def _valor_salario(numero: str, sufixo: str | None) -> float | None:
+    if (sufixo or "").lower() in {"k", "mil"}:
+        return _valor_k_ou_mil(numero, 1000)
+    return _br_para_float(numero)
+
+
 def extrair_salarios(texto: str, texto_norm: str) -> dict | None:
-    """Devolve {min, max, texto} em BRL mensal, ou None se nada foi encontrado."""
+    """Devolve {min, max, texto} em BRL mensal, ou None se nada foi encontrado.
+
+    Uma faixa com um único R$ (ex.: ``R$ 1.500 a 2.500``) conta os dois
+    extremos. O piso usa o teto da faixa, então o segundo valor não pode se perder.
+    """
     achados: list[tuple[int, int, float, str]] = []  # start, end, valor, trecho
 
-    def registrar(match: re.Match, valor: float | None) -> None:
+    def registrar(inicio: int, fim: int, valor: float | None, trecho: str) -> None:
         if valor is None:
             return
         # Ignora valores absurdos para salário mensal em BRL de vaga júnior/pleno.
         if valor < 500 or valor > 80000:
             return
-        trecho = match.group(0)
-        achados.append((match.start(), match.end(), valor, trecho))
+        achados.append((inicio, fim, valor, trecho))
+
+    def registrar_match(match: re.Match, valor: float | None) -> None:
+        registrar(match.start(), match.end(), valor, match.group(0))
+
+    num = r"(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?|\d+(?:[.,]\d{1,2})?)"
+    # R$ 1.500 a 2.500 | R$ 1.500 a R$ 2.500 | R$ 1,5k a 3k | R$ 2 mil até 4 mil
+    # O conector é palavra inteira para não comer o "a" de "a partir" / "anos".
+    padrao_faixa = re.compile(
+        rf"r\$\s*{num}\s*(k|mil)?\s*"
+        rf"(?:(?<![a-z0-9])(?:a|ate|e)(?![a-z0-9])|[-–—])\s*"
+        rf"(?:r\$\s*)?{num}\s*(k|mil)?",
+        re.IGNORECASE,
+    )
+    for m in padrao_faixa.finditer(texto_norm):
+        v1 = _valor_salario(m.group(1), m.group(2))
+        v2 = _valor_salario(m.group(3), m.group(4))
+        registrar(m.start(), m.end(), v1, m.group(0))
+        registrar(m.start(), m.end(), v2, m.group(0))
 
     # R$ 1.500,00 | R$1.500 | R$ 1500 | R$ 1,5 mil | R$ 3k
     padrao_rs = re.compile(
@@ -263,11 +290,9 @@ def extrair_salarios(texto: str, texto_norm: str) -> dict | None:
         re.IGNORECASE,
     )
     for m in padrao_rs.finditer(texto_norm):
-        bruto_num, sufixo = m.group(1), (m.group(2) or "").lower()
-        if sufixo in {"k", "mil"}:
-            registrar(m, _valor_k_ou_mil(bruto_num, 1000))
-        else:
-            registrar(m, _br_para_float(bruto_num))
+        if any(a <= m.start() < b for a, b, _, _ in achados):
+            continue
+        registrar_match(m, _valor_salario(m.group(1), m.group(2)))
 
     # 1,5k / 1.5k / 3k  (sem R$), só em contexto de remuneração ou faixa curta
     padrao_k = re.compile(
@@ -283,7 +308,7 @@ def extrair_salarios(texto: str, texto_norm: str) -> dict | None:
         if any(a <= m.start() < b for a, b, _, _ in achados):
             continue
         if tem_contexto or _vizinho_parece_salario(texto_norm, m.start(), m.end()):
-            registrar(m, _valor_k_ou_mil(m.group(1), 1000))
+            registrar_match(m, _valor_k_ou_mil(m.group(1), 1000))
 
     # 2 mil / 1,8 mil (sem R$)
     padrao_mil = re.compile(
@@ -294,7 +319,7 @@ def extrair_salarios(texto: str, texto_norm: str) -> dict | None:
         if any(a <= m.start() < b for a, b, _, _ in achados):
             continue
         if tem_contexto or _vizinho_parece_salario(texto_norm, m.start(), m.end()):
-            registrar(m, _valor_k_ou_mil(m.group(1), 1000))
+            registrar_match(m, _valor_k_ou_mil(m.group(1), 1000))
 
     if not achados:
         return None

@@ -217,6 +217,56 @@ def main() -> int:
         got = pf.descarte_por_horario(pf.normalizar(texto), cfg)
         checar(got is esperado, f"horário unitário esperado={esperado} got={got}: {texto[:60]}")
 
+    # Faixa com um único R$: o teto sem prefixo também conta.
+    faixa = "Estamos contratando Desenvolvedor Python Júnior, 100% remoto. Stack: Python e FastAPI. Salário: R$ 1.500 a 2.500."
+    sal = pf.extrair_salarios(faixa, pf.normalizar(faixa))
+    checar(
+        sal is not None and sal["min"] == 1500 and sal["max"] == 2500,
+        f"faixa R$ 1.500 a 2.500 vira min/max (obtido: {sal})",
+    )
+    checar(
+        not pf.salario_abaixo_do_piso(sal, float(cfg.get("salario_piso", 1800))),
+        "faixa com teto 2.500 não fica abaixo do piso",
+    )
+    mantidos_faixa, contagem_faixa = pf.filtrar(
+        [{"texto": faixa, "url": "https://exemplo.local/vagas/faixa-rs-compartilhado"}],
+        cfg,
+        min_score,
+        set(),
+    )
+    checar(contagem_faixa["salario_abaixo_piso"] == 0, "faixa compartilhada não cai no piso")
+    checar(len(mantidos_faixa) == 1, "faixa compartilhada é mantida")
+
+    baixo = "Vaga Python Júnior remota com FastAPI. Salário: R$ 1.000 a 1.400."
+    sal_baixo = pf.extrair_salarios(baixo, pf.normalizar(baixo))
+    checar(
+        sal_baixo is not None and sal_baixo["max"] == 1400,
+        f"faixa inteira abaixo do piso mantém o teto (obtido: {sal_baixo})",
+    )
+    checar(
+        pf.salario_abaixo_do_piso(sal_baixo, 1800),
+        "teto 1.400 continua abaixo do piso",
+    )
+
+    unico = "Salário: R$ 1.500 a combinar. Python júnior remoto."
+    sal_unico = pf.extrair_salarios(unico, pf.normalizar(unico))
+    checar(
+        sal_unico is not None and sal_unico["min"] == 1500 and sal_unico["max"] == 1500,
+        f"R$ 1.500 a combinar não inventa o segundo valor (obtido: {sal_unico})",
+    )
+    partir = "Salário de R$ 2.000 a partir de junho. Python júnior remoto FastAPI."
+    sal_partir = pf.extrair_salarios(partir, pf.normalizar(partir))
+    checar(
+        sal_partir is not None and sal_partir["max"] == 2000,
+        f"a partir de não vira faixa (obtido: {sal_partir})",
+    )
+    kfaixa = "Faixa salarial de R$ 1,5k a 3k. Python júnior remoto."
+    sal_k = pf.extrair_salarios(kfaixa, pf.normalizar(kfaixa))
+    checar(
+        sal_k is not None and sal_k["min"] == 1500 and sal_k["max"] == 3000,
+        f"faixa R$ 1,5k a 3k (obtido: {sal_k})",
+    )
+
     if falhas:
         print(f"\n{len(falhas)} falha(s).")
         return 1

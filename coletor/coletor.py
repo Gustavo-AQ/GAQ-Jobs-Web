@@ -1129,13 +1129,18 @@ def _casa_keyword(keyword: str, texto: str) -> bool:
 
 
 def _passa_local(modelo: str = "", local: str = "", extra: str = "") -> bool:
-    """Mantém remoto, São Paulo, ou vaga sem local/modelo informado."""
+    """Mantém remoto, São Paulo, ou vaga sem local informado.
+
+    Híbrido ou presencial sem cidade/UF segue adiante: o pré-filtro é quem
+    decide quando o anúncio não diz o lugar. Local explícito fora de SP,
+    e sem sinal de remoto, é descartado aqui.
+    """
     t = _norm(f"{modelo} {local} {extra}")
     if any(s in t for s in ("remot", "home office", "anywhere", "worldwide")):
         return True
     if "sao paulo" in t or re.search(r"\bsp\b", t):
         return True
-    if not _norm(local) and not _norm(modelo):
+    if not _norm(local):
         return True
     return False
 
