@@ -162,3 +162,13 @@ jobs:
             exit 1
           fi
           test "$(psql -At -c "SELECT count(*) FROM empregos.vagas WHERE fonte='CI'")" = "1"
+
+      - name: Simular upgrade de banco antigo sem status v2 e sem tabelas web
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "DROP SCHEMA empregos CASCADE;"
+          psql -v ON_ERROR_STOP=1 -f db/000_jobs_whodb.sql
+          psql -v ON_ERROR_STOP=1 -f db/010_dictionary_whodb.sql
+          python migrator/ensure.py
+          test "$(psql -At -c "SELECT to_regclass('empregos.web_sessoes') IS NOT NULL")" = "t"
+          test "$(psql -At -c "SELECT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='empregos.vagas_status_hist'::regclass AND pg_get_constraintdef(oid) LIKE '%DISPONIBILIDADE%')")" = "t"
+          psql -v ON_ERROR_STOP=1 -c "SELECT version, origin FROM empregos.schema_migrations ORDER BY version;"
