@@ -13,6 +13,20 @@ jobs:
           python-version: "3.13"
       - run: pip install -r backend/requirements-dev.txt
       - run: PYTHONPATH=backend pytest backend/tests -q
+  busca:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Testes do pré-filtro
+        working-directory: prefiltro
+        run: python3 testes.py
+      - name: Testes do coletor
+        working-directory: coletor
+        run: python3 testes.py
+
   frontend:
     runs-on: ubuntu-latest
     steps:

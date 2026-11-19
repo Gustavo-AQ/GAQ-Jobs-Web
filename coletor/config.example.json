@@ -1,0 +1,41 @@
+{
+  "keywords": [
+    "python",
+    "desenvolvedor python",
+    "backend",
+    "dados",
+    "automação",
+    "rpa",
+    "n8n",
+    "ia",
+    "devops",
+    "qa automação"
+  ],
+  "fontes": [
+    "gupy",
+    "himalayas",
+    "infojobs",
+    "catho",
+    "vagas",
+    "nerdin",
+    "backendbr",
+    "programathor",
+    "remotar"
+  ],
+  "filtro_local": {
+    "remoto": true,
+    "sao_paulo": true
+  },
+  "max_por_busca": 40,
+  "max_paginas": 1,
+  "atraso_segundos": 1.2,
+  "timeout_segundos": 25,
+  "himalayas_country": "BR",
+  "himalayas_seniority": [
+    "Entry-level",
+    "Mid-level"
+  ],
+  "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+  "saida": "vagas_coletadas.json",
+  "backendbr_paginas": 1
+}

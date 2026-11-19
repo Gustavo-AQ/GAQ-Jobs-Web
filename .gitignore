@@ -5,6 +5,11 @@ node_modules/
 dist/
 __pycache__/
 *.py[cod]
+# Config local do coletor e do pré-filtro (o exemplo versionado é config.example.json).
+coletor/config.json
+prefiltro/config.json
+# Saídas da coleta e do pré-filtro.
+vagas_*.json
 .pytest_cache/
 .venv/
 .vscode/

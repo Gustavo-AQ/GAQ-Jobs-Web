@@ -1,0 +1,556 @@
+{
+  "min_score": 40,
+  "salario_piso": 1800,
+  "idiomas_eliminatorios": ["espanhol"],
+  "horarios_eliminatorios": ["noturno"],
+  "horario_limite_fim": "19:00",
+  "local_presencial": {
+    "uf": "SP",
+    "cidades": []
+  },
+  "similaridade_duplicata": 0.85,
+  "habilidades_teto": 30,
+  "pesos": {
+    "habilidades": 50,
+    "area": 20,
+    "nivel": 15,
+    "modelo_local": 15
+  },
+  "habilidades": [
+    {
+      "termo": "Python",
+      "aliases": [
+        "python"
+      ],
+      "peso": 10
+    },
+    {
+      "termo": "IA generativa",
+      "aliases": [
+        "ia generativa",
+        "inteligencia artificial generativa",
+        "generative ai",
+        "genai",
+        "gen ai"
+      ],
+      "peso": 9
+    },
+    {
+      "termo": "LLMs",
+      "aliases": [
+        "llms",
+        "llm"
+      ],
+      "peso": 8
+    },
+    {
+      "termo": "OpenAI API",
+      "aliases": [
+        "openai api",
+        "api da openai",
+        "api openai",
+        "openai"
+      ],
+      "peso": 9
+    },
+    {
+      "termo": "LangChain",
+      "aliases": [
+        "langchain",
+        "lang chain"
+      ],
+      "peso": 8
+    },
+    {
+      "termo": "FastAPI",
+      "aliases": [
+        "fastapi",
+        "fast api"
+      ],
+      "peso": 8
+    },
+    {
+      "termo": "agentes",
+      "aliases": [
+        "agentes de ia",
+        "agente de ia",
+        "ai agents",
+        "ai agent"
+      ],
+      "peso": 8
+    },
+    {
+      "termo": "assistentes de IA",
+      "aliases": [
+        "assistentes de ia",
+        "assistente de ia",
+        "fluxos de ia",
+        "fluxo de ia"
+      ],
+      "peso": 7
+    },
+    {
+      "termo": "APIs REST",
+      "aliases": [
+        "apis rest",
+        "api rest",
+        "rest apis",
+        "rest api",
+        "restful"
+      ],
+      "peso": 7
+    },
+    {
+      "termo": "n8n",
+      "aliases": [
+        "n8n"
+      ],
+      "peso": 7
+    },
+    {
+      "termo": "Docker",
+      "aliases": [
+        "docker"
+      ],
+      "peso": 7
+    },
+    {
+      "termo": "AWS",
+      "aliases": [
+        "aws",
+        "amazon web services"
+      ],
+      "peso": 7
+    },
+    {
+      "termo": "SQL",
+      "aliases": [
+        "sql"
+      ],
+      "peso": 6
+    },
+    {
+      "termo": "MariaDB/MySQL",
+      "aliases": [
+        "mariadb",
+        "mysql",
+        "maria db"
+      ],
+      "peso": 6
+    },
+    {
+      "termo": "Linux",
+      "aliases": [
+        "linux",
+        "linux server"
+      ],
+      "peso": 6
+    },
+    {
+      "termo": "Prompt Engineering",
+      "aliases": [
+        "prompt engineering",
+        "engenharia de prompt",
+        "engenharia de prompts",
+        "prompt engineer"
+      ],
+      "peso": 6
+    },
+    {
+      "termo": "JSON Schema",
+      "aliases": [
+        "json schema",
+        "jsonschema"
+      ],
+      "peso": 6
+    },
+    {
+      "termo": "RAG",
+      "aliases": [
+        "rag",
+        "retrieval augmented generation"
+      ],
+      "peso": 6
+    },
+    {
+      "termo": "webhooks",
+      "aliases": [
+        "webhooks",
+        "webhook"
+      ],
+      "peso": 5
+    },
+    {
+      "termo": "MCP",
+      "aliases": [
+        "mcp",
+        "model context protocol"
+      ],
+      "peso": 5
+    },
+    {
+      "termo": "Nginx",
+      "aliases": [
+        "nginx"
+      ],
+      "peso": 4
+    },
+    {
+      "termo": "pandas",
+      "aliases": [
+        "pandas"
+      ],
+      "peso": 4
+    },
+    {
+      "termo": "Git/GitHub",
+      "aliases": [
+        "github",
+        "git"
+      ],
+      "peso": 3
+    },
+    {
+      "termo": "NumPy",
+      "aliases": [
+        "numpy"
+      ],
+      "peso": 3
+    }
+  ],
+  "areas": {
+    "nucleo": [
+      {
+        "termo": "IA/ML",
+        "aliases": [
+          "ia generativa",
+          "inteligencia artificial",
+          "artificial intelligence",
+          "machine learning",
+          "deep learning",
+          "llm",
+          "llms",
+          "genai",
+          "ml ops",
+          "mlops",
+          "ciencia de dados aplicada a ia"
+        ]
+      },
+      {
+        "termo": "backend",
+        "aliases": [
+          "backend",
+          "back-end",
+          "back end",
+          "desenvolvedor python",
+          "python developer",
+          "engenharia de software",
+          "software engineer"
+        ]
+      }
+    ],
+    "adjacentes": [
+      {
+        "termo": "dados",
+        "aliases": [
+          "engenheiro de dados",
+          "engineering de dados",
+          "data engineer",
+          "analista de dados",
+          "data analyst",
+          "analise de dados",
+          "etl",
+          "pipeline de dados",
+          "dataops"
+        ]
+      },
+      {
+        "termo": "automação/RPA",
+        "aliases": [
+          "rpa",
+          "automacao",
+          "automation anywhere",
+          "uipath",
+          "ui path",
+          "power automate",
+          "automacao de processos"
+        ]
+      },
+      {
+        "termo": "DevOps/cloud",
+        "aliases": [
+          "devops",
+          "dev ops",
+          "sre",
+          "cloud",
+          "infraestrutura",
+          "platform engineer",
+          "plataforma"
+        ]
+      },
+      {
+        "termo": "QA",
+        "aliases": [
+          "qa",
+          "quality assurance",
+          "automacao de testes",
+          "teste automatizado",
+          "testes automatizados",
+          "quality engineer",
+          "sdet",
+          "selenium",
+          "cypress",
+          "pytest"
+        ]
+      }
+    ]
+  },
+  "niveis_aceitaveis": {
+    "junior": [
+      "junior",
+      "jr",
+      "jr.",
+      "entry level",
+      "entry-level",
+      "nivel i",
+      "nível i",
+      "i junior"
+    ],
+    "trainee": [
+      "trainee",
+      "programa de trainee"
+    ],
+    "estagio": [
+      "estagio",
+      "estagiario",
+      "intern",
+      "internship",
+      "programa de estagio"
+    ],
+    "pleno_inicial": [
+      "pleno inicial",
+      "pleno/junior",
+      "junior/pleno",
+      "junior ou pleno",
+      "pleno ou junior",
+      "jr/pleno",
+      "pleno/jr"
+    ],
+    "pleno": [
+      "pleno",
+      "mid level",
+      "mid-level",
+      "nivel ii",
+      "nível ii"
+    ]
+  },
+  "niveis_senior": [
+    "senior",
+    "sr",
+    "sr.",
+    "lead",
+    "tech lead",
+    "team lead",
+    "especialista",
+    "staff",
+    "principal",
+    "staff engineer",
+    "principal engineer"
+  ],
+  "nao_e_vaga": {
+    "candidato": [
+      "open to work",
+      "opentowork",
+      "#opentowork",
+      "estou em busca de uma vaga",
+      "estou em busca de vaga",
+      "estou em busca de uma oportunidade",
+      "estou em busca de oportunidade",
+      "estou em busca de emprego",
+      "estou em busca de recolocacao",
+      "estou em busca de uma recolocacao",
+      "estou procurando uma vaga",
+      "estou procurando vaga",
+      "estou procurando emprego",
+      "estou procurando oportunidade",
+      "estou procurando recolocacao",
+      "estou buscando uma vaga",
+      "estou buscando vaga",
+      "estou buscando emprego",
+      "estou buscando recolocacao",
+      "busco uma vaga",
+      "busco vaga",
+      "busco emprego",
+      "busco recolocacao",
+      "busco uma oportunidade de trabalho",
+      "procurando recolocacao",
+      "em busca de recolocacao",
+      "disponivel para novas oportunidades",
+      "disponivel para oportunidades",
+      "atualizei meu curriculo",
+      "segue meu curriculo",
+      "anexo meu curriculo"
+    ],
+    "curso": [
+      "inscreva-se no curso",
+      "inscreva-se na turma",
+      "inscreva-se na formacao",
+      "garanta sua vaga no curso",
+      "garanta sua vaga na turma",
+      "vaga no curso de",
+      "vagas no curso",
+      "vagas para a turma",
+      "aula inaugural",
+      "aula ao vivo",
+      "curso com certificado",
+      "curso gratuito de",
+      "bootcamp com certificado",
+      "inscricoes abertas para o curso",
+      "inscricoes abertas para a turma",
+      "link de inscricao do curso"
+    ]
+  },
+  "sinais_de_vaga": [
+    "estamos contratando",
+    "vaga para",
+    "vaga de",
+    "vagas para",
+    "requisitos",
+    "responsabilidades",
+    "como se candidatar",
+    "candidate-se",
+    "candidate se",
+    "envie seu curriculo",
+    "job description",
+    "estamos buscando profissionais",
+    "estamos em busca de profissionais",
+    "estamos em busca de um",
+    "estamos em busca de uma",
+    "buscamos um",
+    "buscamos uma",
+    "contratar",
+    "jornada",
+    "beneficios"
+  ],
+  "modelo_trabalho": {
+    "remoto": [
+      "remoto",
+      "remote",
+      "home office",
+      "home-office",
+      "trabalho remoto",
+      "100% remoto",
+      "totalmente remoto",
+      "fully remote",
+      "anywhere",
+      "qualquer lugar"
+    ],
+    "hibrido": [
+      "hibrido",
+      "hybrid",
+      "modelo hibrido"
+    ],
+    "presencial": [
+      "presencial",
+      "on-site",
+      "onsite",
+      "on site",
+      "no escritorio",
+      "alocado",
+      "face to face",
+      "face-to-face"
+    ]
+  },
+  "local_sp": [
+    "sao paulo",
+    "s. paulo",
+    "capital paulista",
+    "grande sao paulo",
+    "regiao metropolitana de sao paulo",
+    "rmsp",
+    "abc paulista",
+    "abc",
+    "santo andre",
+    "sao bernardo do campo",
+    "sao bernardo",
+    "sao caetano do sul",
+    "sao caetano",
+    "diadema",
+    "maua",
+    "guarulhos",
+    "osasco",
+    "barueri",
+    "alphaville",
+    "taboao da serra",
+    "carapicuiba",
+    "cotia",
+    "jandira",
+    "itapevi",
+    "santana de parnaiba",
+    "jundiai",
+    "campinas",
+    "sorocaba",
+    "santos",
+    "sao jose dos campos",
+    "sjc",
+    "estado de sao paulo",
+    "interior de sao paulo",
+    "ribeirao preto"
+  ],
+  "local_sp_abreviacoes": [
+    "sp"
+  ],
+  "locais_fora_sp": [
+    "rio de janeiro",
+    "belo horizonte",
+    "curitiba",
+    "porto alegre",
+    "brasilia",
+    "florianopolis",
+    "recife",
+    "salvador",
+    "fortaleza",
+    "manaus",
+    "belem",
+    "goiania",
+    "vitoria",
+    "natal",
+    "maceio",
+    "joao pessoa",
+    "teresina",
+    "cuiaba",
+    "campo grande",
+    "uberlandia",
+    "londrina",
+    "maringa",
+    "niteroi",
+    "duque de caxias",
+    "nova iguacu",
+    "contagem",
+    "juiz de fora",
+    "joinville",
+    "blumenau",
+    "caxias do sul"
+  ],
+  "locais_fora_sp_abreviacoes": [
+    "rj",
+    "mg",
+    "pr",
+    "rs",
+    "df",
+    "sc",
+    "pe",
+    "ba",
+    "ce",
+    "am",
+    "pa",
+    "go",
+    "es",
+    "rn",
+    "al",
+    "pb",
+    "pi",
+    "mt",
+    "ms"
+  ]
+}

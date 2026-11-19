@@ -49,7 +49,7 @@ Esse compose cria PostgreSQL 18 e o database gaq, executando SQLs apenas quando 
 
 1. Adicione repositório Gustavo-AQ/GAQ-Jobs-Web como Application.
 2. Build Pack Docker Compose, localização /compose.yaml.
-3. Branch de teste feat/gaq-jobs-web-v1; main após integração.
+3. Branch main (a branch feat/gaq-jobs-web-v1 já foi integrada).
 4. Configure as variáveis privadas:
    - DATABASE_URL = postgresql+psycopg://gaq_jobs_web:SENHA_URL_ENCODED@HOST_INTERNO:5432/gaq
    - APP_ORIGIN = https://jobs.gaqtech.dev
@@ -75,7 +75,7 @@ Informe a senha somente no prompt, nunca em argumentos, env ou Git.
 
 ## 6. Teste após deploy
 
-Confirme login, dashboard com vagas reais, botão Abrir vaga, busca, filtros, edição de status e histórico no WhoDB. Teste com uma vaga de laboratório. O Grok e o Whisper devem continuar funcionando. Logout deve encerrar sessão.
+Confirme login, dashboard com vagas reais, botão Abrir vaga, busca, filtros, edição de status e histórico no WhoDB. Teste com uma vaga de laboratório. O assistente deve continuar gravando vagas pelo MCP. O fluxo antigo de Whisper/Telegram, se ainda existir, é separado deste painel. Logout deve encerrar sessão.
 
 A aplicação usa autenticação interna; mudar de domínio exige atualizar APP_ORIGIN, domínio Coolify e DNS, sem perder usuários. Sessões antigas podem exigir login novo.
 

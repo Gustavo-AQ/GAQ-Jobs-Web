@@ -1,0 +1,5 @@
+# Coletor de vagas — somente a biblioteca padrão do Python.
+# Não há pacote de terceiros para instalar.
+#
+# Versão: Python 3.11 ou superior.
+# O CI deste repositório roda os testes com Python 3.13.
