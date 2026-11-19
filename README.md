@@ -50,6 +50,7 @@ O pré-filtro corta o que claramente não serve (nível, idioma obrigatório, ho
 - `coletor/`: coleta HTTP sem login. Config de exemplo em `config.example.json`; `GITHUB_TOKEN` opcional em `coletor/.env.example`.
 - `prefiltro/`: descarte e nota antes do assistente. Filtros eliminatórios editáveis no config de exemplo.
 - `docs/INSTALACAO.md`: instruções completas para Coolify e PostgreSQL.
+- `docs/INSTALACAO_CONDICIONAL.md`: guia dos dois novos Compose com migrações seguras, variáveis, operação e diagnóstico.
 - `docs/BANCO_DE_DADOS.md`: dicionário técnico das cinco tabelas, chaves, regras, permissões, funções MCP e auditoria.
 - `docs/DIAGRAMA_ER.md`: diagrama Mermaid dos relacionamentos e arquitetura de acesso ao PostgreSQL.
 - `docs/USO.md`: guia do painel.
