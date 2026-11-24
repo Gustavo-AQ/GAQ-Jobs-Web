@@ -23,6 +23,7 @@ SCRIPTS = {
     "base": "000_jobs_whodb.sql",
     "dictionary": "010_dictionary_whodb.sql",
     "status_v2": "020_status_v2_whodb.sql",
+    "comprovante_inscrito": "030_comprovante_inscrito_whodb.sql",
     "auth": "001_auth_whodb.sql",
 }
 BASE_TABLES = {"vagas", "vagas_status_hist"}
@@ -151,6 +152,17 @@ def v2_ready(conn):
             "VERIFICACAO_SITE" in status_fn)
 
 
+def comprovante_ready(conn):
+    """True quando a função de status já sabe preencher ou recusar comprovante."""
+    status_fn = scalar(conn, """
+        SELECT COALESCE((
+            SELECT pg_get_functiondef(to_regprocedure('empregos.mcp_atualizar_status(jsonb)'))
+            WHERE to_regprocedure('empregos.mcp_atualizar_status(jsonb)') IS NOT NULL
+        ), '')""")
+    return ("COMPROVANTE_REGISTRADO" in status_fn and
+            "COMPROVANTE_JA_EXISTENTE" in status_fn)
+
+
 def verify_columns(conn, names):
     for table in names:
         rows = conn.execute("""
@@ -206,6 +218,8 @@ def verify(conn):
             raise SchemaProblem(f"Função ausente: {name}.")
     if not v2_ready(conn):
         raise SchemaProblem("Migração de status v2 ausente ou incompleta.")
+    if not comprovante_ready(conn):
+        raise SchemaProblem("Migração de comprovante em vaga já INSCRITO ausente ou incompleta.")
     for role in ("gaq_jobs_web", "gaq_jobs_grok"):
         if not role_exists(conn, role):
             raise SchemaProblem(f"Role ausente: {role}.")
@@ -284,7 +298,7 @@ def main():
                     )
                 if mode == "check":
                     raise SchemaProblem("Schema GAQ Jobs ainda não instalado (modo check).")
-                for key in ("base", "dictionary", "status_v2", "auth"):
+                for key in ("base", "dictionary", "status_v2", "comprovante_inscrito", "auth"):
                     apply_sql(conn, key)
                     applied.append(key)
             else:
@@ -300,6 +314,13 @@ def main():
                         raise SchemaProblem("Migração de status v2 necessária (modo check).")
                     apply_sql(conn, "status_v2")
                     applied.append("status_v2")
+                if not comprovante_ready(conn):
+                    if mode == "check":
+                        raise SchemaProblem(
+                            "Migração de comprovante em vaga já INSCRITO necessária (modo check)."
+                        )
+                    apply_sql(conn, "comprovante_inscrito")
+                    applied.append("comprovante_inscrito")
 
                 existing_web = current_tables & WEB_TABLES
                 needs_auth = (existing_web != WEB_TABLES or

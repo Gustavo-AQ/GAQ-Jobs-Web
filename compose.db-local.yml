@@ -12,6 +12,7 @@ services:
       - ./db/000_jobs_whodb.sql:/docker-entrypoint-initdb.d/00_jobs.sql:ro
       - ./db/010_dictionary_whodb.sql:/docker-entrypoint-initdb.d/01_dictionary.sql:ro
       - ./db/020_status_v2_whodb.sql:/docker-entrypoint-initdb.d/02_status.sql:ro
+      - ./db/030_comprovante_inscrito_whodb.sql:/docker-entrypoint-initdb.d/02b_comprovante.sql:ro
       - ./db/001_auth_whodb.sql:/docker-entrypoint-initdb.d/03_auth.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d gaq"]

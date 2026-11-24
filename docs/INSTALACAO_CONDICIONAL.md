@@ -25,8 +25,9 @@ Ao ser executado, o container `migrate`:
    - `db/000_jobs_whodb.sql` — schema, vagas, histórico, funções e índices;
    - `db/010_dictionary_whodb.sql` — comentários e função de documentação;
    - `db/020_status_v2_whodb.sql` — auditoria e atualização de status v2;
+   - `db/030_comprovante_inscrito_whodb.sql` — comprovante vazio em candidatura já INSCRITO, e recusa quando o texto já existe;
    - `db/001_auth_whodb.sql` — login e sessões do site.
-5. Se o núcleo já está instalado, verifica o formato das colunas das tabelas centrais e aplica **apenas migrações conhecidas necessárias**, como adição do dicionário, status v2 ou tabelas web ausentes.
+5. Se o núcleo já está instalado, verifica o formato das colunas das tabelas centrais e aplica **apenas migrações conhecidas necessárias**, como adição do dicionário, status v2, comprovante em vaga já INSCRITO ou tabelas web ausentes.
 6. Confere as cinco tabelas e seus tipos de colunas, chaves primárias e estrangeiras, índices, funções, trigger v2 e os papéis/permissões principais. Objetos adicionais não são apagados.
 7. Registra o resultado em `empregos.schema_migrations`: versão, SHA-256 do arquivo e origem `applied` ou `adopted`.
 8. Termina com código de saída 0. Somente então a API inicia, e depois a interface.

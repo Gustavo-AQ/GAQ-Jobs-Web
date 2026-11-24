@@ -104,9 +104,12 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f db/000_jobs_whodb.sql
           psql -v ON_ERROR_STOP=1 -f db/010_dictionary_whodb.sql
           psql -v ON_ERROR_STOP=1 -f db/020_status_v2_whodb.sql
+          psql -v ON_ERROR_STOP=1 -f db/030_comprovante_inscrito_whodb.sql
+          psql -v ON_ERROR_STOP=1 -f db/030_comprovante_inscrito_whodb.sql
           psql -v ON_ERROR_STOP=1 -f db/001_auth_whodb.sql
           psql -v ON_ERROR_STOP=1 -c "SELECT empregos.mcp_descrever_schema();"
           psql -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM empregos.web_usuarios;"
+          psql -v ON_ERROR_STOP=1 -f db/030_comprovante_inscrito_verificar.sql
 
   schema-migrator:
     runs-on: ubuntu-latest
@@ -146,6 +149,7 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 -c "INSERT INTO empregos.vagas(fonte,url,url_canonica,empresa,cargo) VALUES ('CI','https://example.org/job','https://example.org/job','Example','CI test');"
           psql -v ON_ERROR_STOP=1 -c "SELECT version,origin FROM empregos.schema_migrations ORDER BY version;"
+          test "$(psql -At -c "SELECT count(*) FROM empregos.schema_migrations WHERE version='comprovante_inscrito'")" = "1"
       - name: Reexecutar sem apagar a vaga
         run: |
           python migrator/ensure.py
@@ -171,4 +175,6 @@ jobs:
           python migrator/ensure.py
           test "$(psql -At -c "SELECT to_regclass('empregos.web_sessoes') IS NOT NULL")" = "t"
           test "$(psql -At -c "SELECT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='empregos.vagas_status_hist'::regclass AND pg_get_constraintdef(oid) LIKE '%DISPONIBILIDADE%')")" = "t"
+          test "$(psql -At -c "SELECT strpos(pg_get_functiondef('empregos.mcp_atualizar_status(jsonb)'::regprocedure), 'COMPROVANTE_REGISTRADO') > 0")" = "t"
+          psql -v ON_ERROR_STOP=1 -f db/030_comprovante_inscrito_verificar.sql
           psql -v ON_ERROR_STOP=1 -c "SELECT version, origin FROM empregos.schema_migrations ORDER BY version;"

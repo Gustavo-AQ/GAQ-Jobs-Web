@@ -24,7 +24,7 @@ services:
     <<: *pg-common
     profiles: ["full-setup"]
     entrypoint: ["/bin/sh", "-ec"]
-    command: "psql -v ON_ERROR_STOP=1 -f /sql/000_jobs_whodb.sql && psql -v ON_ERROR_STOP=1 -f /sql/010_dictionary_whodb.sql && psql -v ON_ERROR_STOP=1 -f /sql/020_status_v2_whodb.sql && psql -v ON_ERROR_STOP=1 -f /sql/001_auth_whodb.sql"
+    command: "psql -v ON_ERROR_STOP=1 -f /sql/000_jobs_whodb.sql && psql -v ON_ERROR_STOP=1 -f /sql/010_dictionary_whodb.sql && psql -v ON_ERROR_STOP=1 -f /sql/020_status_v2_whodb.sql && psql -v ON_ERROR_STOP=1 -f /sql/030_comprovante_inscrito_whodb.sql && psql -v ON_ERROR_STOP=1 -f /sql/001_auth_whodb.sql"
 
 networks:
   coolify:

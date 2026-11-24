@@ -116,6 +116,6 @@ Os diagramas não substituem `CHECK`, `UNIQUE`, `NOT NULL`, triggers nem permiss
 - Controle de login via `web_usuarios`, sessão com hash em `web_sessoes` e proteção contra repetição de tentativas em `web_login_tentativas`.
 - Campos financeiros e de aderência sujeitos a validações; diferentes colunas podem ser opcionais.
 
-Para os tipos, regras, funções e limitações completas, consulte [BANCO_DE_DADOS.md](BANCO_DE_DADOS.md). Os scripts SQL [000](../db/000_jobs_whodb.sql), [020](../db/020_status_v2_whodb.sql) e [001](../db/001_auth_whodb.sql) são as fontes de implementação.
+Para os tipos, regras, funções e limitações completas, consulte [BANCO_DE_DADOS.md](BANCO_DE_DADOS.md). Os scripts SQL [000](../db/000_jobs_whodb.sql), [020](../db/020_status_v2_whodb.sql), [030](../db/030_comprovante_inscrito_whodb.sql) e [001](../db/001_auth_whodb.sql) são as fontes de implementação.
 
 > O Mermaid é renderizado diretamente pelo GitHub; não é necessário manter imagens estáticas.
