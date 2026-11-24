@@ -3,7 +3,7 @@
 O `ensure.py` é usado exclusivamente nos novos Compose `compose.managed.yaml` e `compose.standalone.yaml`. Não é utilizado no Compose existente da Oracle.
 
 - Inicializa um schema completamente vazio com os arquivos SQL de `db/`.
-- Em um banco com vagas, aplica somente migrações reconhecidas (dicionário, v2, autenticação).
+- Em um banco com vagas, aplica somente migrações reconhecidas (dicionário, v2, comprovante em vaga já INSCRITO, autenticação).
 - Audita tipos de colunas, índices, FKs, PKs, principais privilégios e funções.
 - Para em caso de divergência não conhecida.
 - Não deleta registros nem modifica senhas de roles existentes.

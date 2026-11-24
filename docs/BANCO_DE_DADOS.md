@@ -31,7 +31,8 @@ Ordem de execução completa:
 1. `db/000_jobs_whodb.sql` — verifica database `gaq`, cria schema `empregos`, tabelas principais, índices, trigger de auditoria, role do Grok e funções MCP de cadastro/consulta/status iniciais.
 2. `db/010_dictionary_whodb.sql` — adiciona comentários sobre tabelas/colunas e a função `mcp_descrever_schema`.
 3. `db/020_status_v2_whodb.sql` — amplia auditoria e regras de atualização; **substitui** a implementação inicial da função `mcp_atualizar_status`.
-4. `db/001_auth_whodb.sql` — cria tabelas de autenticação, role da aplicação web e privilégios específicos.
+4. `db/030_comprovante_inscrito_whodb.sql` — permite preencher `comprovante_inscricao` vazio em candidatura que já está `INSCRITO` e recusa a troca quando o texto já existe. Substitui de novo `mcp_atualizar_status` e a regra publicada por `mcp_descrever_schema`.
+5. `db/001_auth_whodb.sql` — cria tabelas de autenticação, role da aplicação web e privilégios específicos.
 
 Em um banco já utilizado com vagas, **não** execute novamente a cadeia completa de maneira indiscriminada; faça backup e avalie cada migração. Os scripts usam `IF NOT EXISTS` em várias tabelas, mas também recriam funções e triggers. Para instalar somente autenticação web numa instância com as tabelas de vagas corretas, execute apenas `001_auth_whodb.sql`.
 
@@ -92,7 +93,7 @@ O schema não possui coluna para a periodicidade do salário. Não assuma que va
 | `observacoes` | TEXT | Notas pessoais editáveis pelo painel; não alteradas pela ferramenta de cadastro MCP |
 | `data_envio` | TIMESTAMPTZ | Primeira notificação informada |
 | `data_inscricao` | TIMESTAMPTZ | Data de inscrição registrada |
-| `comprovante_inscricao` | TEXT | Comprovante fornecido ao atualizar inscrição via MCP |
+| `comprovante_inscricao` | TEXT | Comprovante da inscrição. O MCP preenche na ida para `INSCRITO` ou, se o campo estiver vazio, com a candidatura já `INSCRITO`. Texto já gravado não é substituído pelo agente |
 | `data_publicacao` | DATE | Data divulgada no anúncio |
 | `primeira_coleta` | TIMESTAMPTZ | Primeira coleta; padrão `now()` |
 | `ultima_verificacao` | TIMESTAMPTZ | Última verificação/coleta |
@@ -150,14 +151,18 @@ O trigger `trg_empregos_auditar_status`, associado à função `fn_auditar_statu
 
 **As famílias são independentes:** uma vaga pode ter candidatura `EM_PROCESSO` e anúncio `EXPIRADA`, sem contradição.
 
-Regras implementadas por `mcp_atualizar_status(jsonb)` na v2:
+Regras implementadas por `mcp_atualizar_status(jsonb)` depois de `030_comprovante_inscrito_whodb.sql` (a v2 continua valendo; a migração 030 só acrescenta o comprovante):
 
 - Atualização de `NOTIFICACAO` de `NOVA` para `ENVIADA` pode ser registrada automaticamente **após a vaga ter sido informada ao usuário**.
 - Mudanças protegidas exigem origem `PEDIDO_USUARIO` ou `EMAIL` e evidência com pelo menos 12 caracteres; mudanças de disponibilidade por `VERIFICACAO_SITE` exigem evidência da página consultada.
 - Origem `EMAIL` exige `gmail_message_id`, `email_remetente` e `email_assunto`; não permite decidir `INTERESSE`, `DESCARTADA` ou `NAO_AVALIADA`, que dependem de pedido do usuário.
-- A função impede reutilizar o mesmo Gmail ID para justificar outra vaga ou outro status.
+- A função impede reutilizar o mesmo Gmail ID para justificar outra vaga ou outro status. Mudança de status continua registrada em `vagas_status_hist`. O preenchimento de comprovante sem mudança de status grava o id em `empregos.vagas_email_uso`, fora do histórico exibido no painel. As roles `gaq_jobs_grok` e `gaq_jobs_web` não têm acesso direto a essa tabela.
 - Para marcar `INSCRITO` quando o próprio bot realizou a inscrição (`bot_realizou_inscricao=true`), exige `comprovante_inscricao`. A data inicial de inscrição é preservada em chamadas posteriores.
-- Uma atualização para o mesmo status retorna `SEM_ALTERACAO`, sem evento duplicado de alteração.
+- Uma atualização para o mesmo status retorna `SEM_ALTERACAO`, sem evento duplicado de alteração, exceto no caso do comprovante vazio descrito abaixo.
+- Se `CANDIDATURA` já é `INSCRITO` e `comprovante_inscricao` está vazio (`NULL` ou texto só com espaços), a mesma chamada pode preenchê-lo sem mudar o status. Exige `comprovante_inscricao`, origem `PEDIDO_USUARIO` ou `EMAIL` e evidência com pelo menos 12 caracteres. `EMAIL` continua exigindo `gmail_message_id`, `email_remetente` e `email_assunto`. A ação de retorno é `COMPROVANTE_REGISTRADO`. O status, `data_inscricao`, `data_status` e `observacoes` permanecem. Essa gravação não gera linha em `vagas_status_hist`, porque nenhuma família de status mudou. Se a origem for `EMAIL`, o `gmail_message_id` fica em `empregos.vagas_email_uso` e não pode ser reutilizado em outra vaga ou em outro status.
+- Se `comprovante_inscricao` já tem conteúdo e a chamada pede `INSCRITO` enviando outro texto, a função não grava nada e retorna `ok=false` com ação `COMPROVANTE_JA_EXISTENTE`. O mesmo vale quando o texto enviado é igual ao já gravado e o status não muda: a resposta é a recusa, em vez de `SEM_ALTERACAO`. Repetir o texto idêntico só não bloqueia a chamada quando o status realmente muda para `INSCRITO`; nesse caso o texto armazenado é mantido.
+- Não existe origem, flag ou parâmetro que autorize o MCP a substituir um comprovante preenchido. O painel web não edita essa coluna: o administrador altera `status_candidatura` e `observacoes`, e a role `gaq_jobs_web` não tem `UPDATE` em `comprovante_inscricao`. A correção de um comprovante errado é manual, feita pelo usuário direto no banco (WhoDB ou SQL administrativo), com backup.
+- A função não escreve na coluna `observacoes`. O parâmetro `observacao` do JSON, quando a chamada muda o status, continua indo apenas para o histórico.
 
 **Limitação de confiança importante:** a função PostgreSQL valida os campos de evidência fornecidos pelo agente, mas **não autentica o conteúdo do Gmail**. A confirmação independente depende de um fluxo que consulte o provedor de e-mail.
 
@@ -169,12 +174,28 @@ O **painel web** tem outra autorização: um usuário autenticado `ADMIN` pode a
 |---|---|---|
 | `empregos.mcp_salvar_vaga(jsonb)` | Insere ou reencontra vagas | Obrigatórios: `fonte`, `url`, `empresa`, `cargo`; JSON até 250.000 caracteres |
 | `empregos.mcp_consultar_vagas(jsonb)` | Consulta com filtros | Limite entre 1 e 50 registros por chamada, deslocamento até 10.000 |
-| `empregos.mcp_atualizar_status(jsonb)` | Atualiza um status | Versão vigente após executar `020_status_v2_whodb.sql` |
+| `empregos.mcp_atualizar_status(jsonb)` | Atualiza um status ou preenche comprovante vazio | Versão vigente após executar `030_comprovante_inscrito_whodb.sql` |
 | `empregos.mcp_descrever_schema()` | Descreve metadados | Consulta de leitura de estrutura e comentários das tabelas de vagas |
 
 O agente usa essas quatro funções por ferramentas PostgreSQL no workflow n8n. A função `mcp_descrever_schema()` expõe apenas as tabelas de **vagas e histórico**, não as tabelas privadas da autenticação.
 
-**Nota de manutenção:** os comentários de `010_dictionary_whodb.sql` e parte dos metadados publicados por `mcp_descrever_schema()` descrevem o comportamento inicial. A migração `020_status_v2_whodb.sql` substitui a implementação de status; em caso de divergência, consulte seu código e as restrições reais.
+**Nota de manutenção:** os comentários de `010_dictionary_whodb.sql` descrevem o comportamento inicial. A migração `020_status_v2_whodb.sql` substitui a implementação de status, e `030_comprovante_inscrito_whodb.sql` substitui de novo a função e o texto da ferramenta `atualizar_status_vaga` em `mcp_descrever_schema()`. Em caso de divergência, prevalece o SQL da migração `030`.
+
+### Aplicar em um banco que já está em produção
+
+O `compose.yaml` da Oracle não executa o migrador. Com backup feito e conectado ao database `gaq` como administrador (WhoDB ou `psql`), execute só este arquivo:
+
+```bash
+psql -v ON_ERROR_STOP=1 -d gaq -f db/030_comprovante_inscrito_whodb.sql
+```
+
+No WhoDB, cole o conteúdo do arquivo numa única execução. O script é idempotente (`CREATE OR REPLACE`) e não apaga vagas. A conferência abaixo abre uma transação, exercita a regra e termina com `ROLLBACK`:
+
+```bash
+psql -v ON_ERROR_STOP=1 -d gaq -f db/030_comprovante_inscrito_verificar.sql
+```
+
+Instalações que usam `compose.managed.yaml` ou `compose.standalone.yaml` recebem o arquivo na próxima execução explícita do serviço `migrate`. Reimportar o workflow n8n atualiza o texto de ajuda da ferramenta; a regra efetiva está no PostgreSQL e em `descrever_banco` depois da migração.
 
 ## 7. Usuários e privilégios
 
@@ -237,4 +258,5 @@ Nunca coloque senhas, `DATABASE_URL`, tokens MCP ou hashes de sessão nos arquiv
 - [Integração n8n/MCP](N8N_MCP.md)
 - [SQL de criação](../db/000_jobs_whodb.sql)
 - [Migração v2](../db/020_status_v2_whodb.sql)
+- [Comprovante em vaga já INSCRITO](../db/030_comprovante_inscrito_whodb.sql)
 - [SQL de autenticação](../db/001_auth_whodb.sql)

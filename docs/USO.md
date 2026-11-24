@@ -20,6 +20,8 @@ Clique numa vaga para abrir detalhes, descrição, competências, informações 
 
 Administradores podem escolher um status, editar observações e clicar em Salvar alterações. O banco registra cada mudança de status em vagas_status_hist. Usuários LEITURA não podem editar.
 
+O comprovante de inscrição não aparece neste formulário e não é gravado pelo botão Salvar. Quando o texto já existe, só o usuário corrige, direto no banco. O assistente não substitui um comprovante preenchido.
+
 ## Integração e segurança
 
 O Grok continua pesquisando e atualizando vagas pelo n8n, independentemente do painel. O frontend não acessa SQL diretamente. Senhas são armazenadas como hash Argon2id; sessões ficam no PostgreSQL.

@@ -53,7 +53,7 @@ O pré-filtro corta o que claramente não serve (nível, idioma obrigatório, ho
 - `compose.standalone.yaml`: PostgreSQL 18 persistente + migrador condicional + site e API.
 - `compose.db-bootstrap.yml`: inicialização SQL opcional contra um banco PostgreSQL existente.
 - `compose.db-local.yml`: PostgreSQL isolado para laboratório.
-- `db/`: instaladores de tabelas, migração v2 e autenticação local.
+- `db/`: instaladores de tabelas, migração v2, comprovante em vaga já INSCRITO e autenticação local.
 - `n8n/GAQ_Jobs_MCP_importar.json`: workflow importável com 4 ferramentas, sem senhas.
 - `coletor/`: coleta HTTP sem login. Config de exemplo em `config.example.json`; `GITHUB_TOKEN` opcional em `coletor/.env.example`.
 - `prefiltro/`: descarte e nota antes do assistente. Filtros eliminatórios editáveis no config de exemplo.
@@ -68,6 +68,8 @@ O pré-filtro corta o que claramente não serve (nível, idioma obrigatório, ho
 ## Instalação na Oracle
 
 Como o banco gaq e as tabelas `empregos.vagas` e `empregos.vagas_status_hist` já existem, faça backup e execute somente `db/001_auth_whodb.sql` no WhoDB. Defina uma senha exclusiva para `gaq_jobs_web`, configure `DATABASE_URL`, `APP_ORIGIN` e `SESSION_SECRET` no Coolify, publique a aplicação a partir de `compose.yaml` na branch `main` e crie o primeiro administrador pelo terminal da API.
+
+Se o banco já passou pela migração de status v2 e ainda não tem a regra nova do comprovante, execute também `db/030_comprovante_inscrito_whodb.sql` no database `gaq`. O comando e a conferência estão em [docs/BANCO_DE_DADOS.md](docs/BANCO_DE_DADOS.md).
 
 Não crie outro banco nem execute full bootstrap no PostgreSQL de produção sem backup e avaliação.
 
