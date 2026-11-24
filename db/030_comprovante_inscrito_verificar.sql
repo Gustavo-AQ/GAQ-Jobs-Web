@@ -19,6 +19,8 @@ DECLARE
   v_bot BIGINT;
   v_email BIGINT;
   v_email_outra BIGINT;
+  v_email_reuso BIGINT;
+  v_uso BIGINT;
   v_sem_campo BIGINT;
   v_interesse BIGINT;
   v_longo BIGINT;
@@ -47,8 +49,24 @@ BEGIN
        pg_catalog.pg_get_functiondef('empregos.mcp_atualizar_status(jsonb)'::regprocedure),
        'COMPROVANTE_JA_EXISTENTE'
      ) = 0
+     OR pg_catalog.to_regclass('empregos.vagas_email_uso') IS NULL
   THEN
     RAISE EXCEPTION 'FALHA: aplique db/030_comprovante_inscrito_whodb.sql antes desta verificacao';
+  END IF;
+  IF pg_catalog.has_table_privilege('gaq_jobs_grok', 'empregos.vagas_email_uso', 'SELECT')
+     OR pg_catalog.has_table_privilege('gaq_jobs_grok', 'empregos.vagas_email_uso', 'INSERT')
+     OR pg_catalog.has_table_privilege('gaq_jobs_grok', 'empregos.vagas_email_uso', 'UPDATE')
+  THEN
+    RAISE EXCEPTION 'FALHA: gaq_jobs_grok nao pode acessar vagas_email_uso direto';
+  END IF;
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'gaq_jobs_web')
+     AND (
+       pg_catalog.has_table_privilege('gaq_jobs_web', 'empregos.vagas_email_uso', 'SELECT')
+       OR pg_catalog.has_table_privilege('gaq_jobs_web', 'empregos.vagas_email_uso', 'INSERT')
+       OR pg_catalog.has_table_privilege('gaq_jobs_web', 'empregos.vagas_email_uso', 'UPDATE')
+     )
+  THEN
+    RAISE EXCEPTION 'FALHA: gaq_jobs_web nao pode acessar vagas_email_uso direto';
   END IF;
 
   DELETE FROM empregos.vagas
@@ -138,6 +156,14 @@ BEGIN
     'https://example.invalid/gaq-comprovante-email-outra', 'Verificacao', 'Cargo email outra',
     v_obs
   ) RETURNING id INTO v_email_outra;
+
+  INSERT INTO empregos.vagas (
+    fonte, url, url_canonica, empresa, cargo, status_candidatura, observacoes
+  ) VALUES (
+    'VERIFICACAO', 'https://example.invalid/gaq-comprovante-email-reuso',
+    'https://example.invalid/gaq-comprovante-email-reuso', 'Verificacao', 'Cargo email reuso',
+    'INSCRITO', v_obs
+  ) RETURNING id INTO v_email_reuso;
 
   INSERT INTO empregos.vagas (
     fonte, url, url_canonica, empresa, cargo, status_candidatura, observacoes
@@ -272,6 +298,10 @@ BEGIN
      OR v_obs_lida IS DISTINCT FROM v_obs OR v_data_lida IS DISTINCT FROM v_data
      OR v_data_status IS DISTINCT FROM v_data OR v_hist_depois IS DISTINCT FROM v_hist THEN
     RAISE EXCEPTION 'FALHA: preenchimento mudou status, datas, observacoes ou historico';
+  END IF;
+  SELECT count(*) INTO v_uso FROM empregos.vagas_email_uso WHERE vaga_id = v_vazio;
+  IF v_uso <> 0 THEN
+    RAISE EXCEPTION 'FALHA: pedido do usuario nao deve consumir mensagem de Gmail';
   END IF;
 
   r := empregos.mcp_atualizar_status(pg_catalog.jsonb_build_object(
@@ -479,6 +509,63 @@ BEGIN
   ));
   IF r->>'acao' IS DISTINCT FROM 'COMPROVANTE_REGISTRADO' OR r->>'status' IS DISTINCT FROM 'INSCRITO' THEN
     RAISE EXCEPTION 'FALHA: EMAIL deveria registrar comprovante vazio: %', r;
+  END IF;
+  SELECT count(*) INTO v_hist_depois
+  FROM empregos.vagas_status_hist WHERE vaga_id = v_email;
+  SELECT count(*) INTO v_uso
+  FROM empregos.vagas_email_uso
+  WHERE gmail_message_id = 'msg-comprovante-1' AND vaga_id = v_email AND status = 'INSCRITO';
+  IF v_hist_depois <> 0 OR v_uso <> 1 THEN
+    RAISE EXCEPTION 'FALHA: EMAIL do comprovante deveria gravar vagas_email_uso sem historico de status';
+  END IF;
+
+  BEGIN
+    PERFORM empregos.mcp_atualizar_status(pg_catalog.jsonb_build_object(
+      'vaga_id', v_email_reuso, 'campo', 'CANDIDATURA', 'status', 'INSCRITO',
+      'origem', 'EMAIL',
+      'evidencia', 'A mesma mensagem nao pode registrar outro comprovante',
+      'comprovante_inscricao', 'protocolo reutilizado',
+      'gmail_message_id', 'msg-comprovante-1',
+      'email_remetente', 'portal@example.invalid',
+      'email_assunto', 'Inscricao confirmada'
+    ));
+    RAISE EXCEPTION 'FALHA: o mesmo Gmail ID deveria ser recusado em outro comprovante';
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLERRM NOT LIKE '%ja foi usada%' THEN
+        RAISE EXCEPTION 'FALHA: erro inesperado no reuso do comprovante: %', SQLERRM;
+      END IF;
+  END;
+  SELECT comprovante_inscricao, status_candidatura, observacoes
+  INTO v_comp, v_status, v_obs_lida
+  FROM empregos.vagas WHERE id = v_email_reuso;
+  SELECT count(*) INTO v_uso
+  FROM empregos.vagas_email_uso WHERE vaga_id = v_email_reuso;
+  IF v_comp IS NOT NULL OR v_status IS DISTINCT FROM 'INSCRITO'
+     OR v_obs_lida IS DISTINCT FROM v_obs OR v_uso <> 0 THEN
+    RAISE EXCEPTION 'FALHA: reuso de Gmail alterou a outra vaga ou gravou o uso';
+  END IF;
+
+  BEGIN
+    PERFORM empregos.mcp_atualizar_status(pg_catalog.jsonb_build_object(
+      'vaga_id', v_email_reuso, 'campo', 'CANDIDATURA', 'status', 'EM_PROCESSO',
+      'origem', 'EMAIL',
+      'evidencia', 'A mesma mensagem nao pode mudar outro status',
+      'gmail_message_id', 'msg-comprovante-1',
+      'email_remetente', 'portal@example.invalid',
+      'email_assunto', 'Inscricao confirmada'
+    ));
+    RAISE EXCEPTION 'FALHA: Gmail usado no comprovante deveria bloquear outro status';
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLERRM NOT LIKE '%ja foi usada%' THEN
+        RAISE EXCEPTION 'FALHA: erro inesperado ao bloquear status com Gmail do comprovante: %', SQLERRM;
+      END IF;
+  END;
+  SELECT status_candidatura, observacoes INTO v_status, v_obs_lida
+  FROM empregos.vagas WHERE id = v_email_reuso;
+  IF v_status IS DISTINCT FROM 'INSCRITO' OR v_obs_lida IS DISTINCT FROM v_obs THEN
+    RAISE EXCEPTION 'FALHA: bloqueio do Gmail mudou status ou observacoes';
   END IF;
 
   r := empregos.mcp_atualizar_status(pg_catalog.jsonb_build_object(

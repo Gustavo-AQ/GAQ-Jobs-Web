@@ -15,6 +15,27 @@ BEGIN
     RAISE EXCEPTION 'ABORTADO: banco esperado gaq; conectado em %', current_database();
   END IF;
 
+  -- Uso do Gmail quando o comprovante e gravado sem mudanca de status.
+  -- Nao entra em vagas_status_hist, para nao parecer uma transicao de status.
+  -- O agente nao recebe GRANT nesta tabela; so a funcao SECURITY DEFINER grava.
+  EXECUTE $ddl$
+  CREATE TABLE IF NOT EXISTS empregos.vagas_email_uso (
+    gmail_message_id TEXT PRIMARY KEY
+      CHECK (length(pg_catalog.btrim(gmail_message_id)) BETWEEN 1 AND 255),
+    vaga_id BIGINT NOT NULL REFERENCES empregos.vagas (id) ON DELETE CASCADE,
+    status TEXT NOT NULL CHECK (length(pg_catalog.btrim(status)) BETWEEN 1 AND 40),
+    usado_em TIMESTAMPTZ NOT NULL DEFAULT pg_catalog.now()
+  );
+  $ddl$;
+  EXECUTE $ddl$
+  CREATE INDEX IF NOT EXISTS ix_empregos_vagas_email_uso_vaga
+    ON empregos.vagas_email_uso (vaga_id);
+  $ddl$;
+  EXECUTE $ddl$
+  COMMENT ON TABLE empregos.vagas_email_uso IS
+    'Mensagem do Gmail ja usada para registrar comprovante sem mudar status. Nao e evento de vagas_status_hist e nao aparece no painel. Sem permissao direta para o MCP.';
+  $ddl$;
+
   EXECUTE $ddl$
   CREATE OR REPLACE FUNCTION empregos.mcp_atualizar_status(p JSONB)
   RETURNS JSONB
@@ -155,11 +176,17 @@ BEGIN
           RAISE EXCEPTION 'EMAIL exige gmail_message_id, email_remetente e email_assunto';
         END IF;
         -- Um mesmo email nao pode justificar vagas ou resultados diferentes.
+        -- O historico cobre mudanca de status. vagas_email_uso cobre o
+        -- comprovante gravado sem mudar status.
         IF EXISTS (
           SELECT 1 FROM empregos.vagas_status_hist h
           WHERE h.alterado_por = 'grok_bot:email'
             AND pg_catalog.strpos(COALESCE(h.observacao,''), 'GmailID=' || v_email_id || ';') > 0
             AND (h.vaga_id <> v_id OR h.status_novo <> v_status)
+        ) OR EXISTS (
+          SELECT 1 FROM empregos.vagas_email_uso u
+          WHERE u.gmail_message_id = v_email_id
+            AND (u.vaga_id <> v_id OR u.status <> v_status)
         ) THEN
           RAISE EXCEPTION 'Esta mensagem do Gmail ja foi usada para outra vaga ou outro status';
         END IF;
@@ -193,7 +220,24 @@ BEGIN
 
     -- Só o comprovante: status, data_inscricao, data_status e observacoes ficam como estão.
     -- Não gera histórico de status, porque nenhuma família de status mudou.
+    -- EMAIL grava o id em vagas_email_uso para a trava de reutilizacao.
     IF v_registrar_comprovante THEN
+      IF v_origem = 'EMAIL' THEN
+        INSERT INTO empregos.vagas_email_uso (gmail_message_id, vaga_id, status)
+        VALUES (v_email_id, v_id, v_status)
+        ON CONFLICT (gmail_message_id) DO NOTHING;
+        IF NOT FOUND THEN
+          IF NOT EXISTS (
+            SELECT 1 FROM empregos.vagas_email_uso u
+            WHERE u.gmail_message_id = v_email_id
+              AND u.vaga_id = v_id
+              AND u.status = v_status
+          ) THEN
+            RAISE EXCEPTION 'Esta mensagem do Gmail ja foi usada para outra vaga ou outro status';
+          END IF;
+        END IF;
+      END IF;
+
       UPDATE empregos.vagas SET
         comprovante_inscricao = v_comprovante,
         atualizado_em = NOW()
@@ -306,7 +350,7 @@ SELECT pg_catalog.jsonb_build_object(
  'ferramentas', pg_catalog.jsonb_build_array(
    pg_catalog.jsonb_build_object('nome','salvar_vaga','obrigatorios', pg_catalog.jsonb_build_array('fonte','url','empresa','cargo'),'funcao','empregos.mcp_salvar_vaga(jsonb)','regra','Salva ou reencontra; retorna vaga_id. Nunca envia status no cadastro.'),
    pg_catalog.jsonb_build_object('nome','consultar_vagas','funcao','empregos.mcp_consultar_vagas(jsonb)','filtros',pg_catalog.jsonb_build_array('id','termo','status','fonte','modelo','nivel','aderencia_min','apenas_nao_enviadas','limite','offset'),'regra','Limite 1..50; status NOVA/ENVIADA e notificacao, outros status sao candidatura.'),
-   pg_catalog.jsonb_build_object('nome','atualizar_status_vaga','funcao','empregos.mcp_atualizar_status(jsonb)','status_permitidos', pg_catalog.jsonb_build_array('NOVA','ENVIADA','NAO_AVALIADA','INTERESSE','DESCARTADA','INSCRITO','EM_PROCESSO','ENTREVISTA','TESTE_TECNICO','OFERTA','REPROVADO','CONTRATADO','DESCONHECIDA','ATIVA','EXPIRADA'),'regra','Campos: NOTIFICACAO, CANDIDATURA, DISPONIBILIDADE. NOVA para ENVIADA automatica apos comunicar. CANDIDATURA exige origem PEDIDO_USUARIO ou EMAIL e evidencia. EMAIL exige gmail_message_id, email_remetente e email_assunto; essas provas sao declaradas pelo Grok, nao verificadas pelo banco. DISPONIBILIDADE permite VERIFICACAO_SITE com evidencia. Se CANDIDATURA ja esta INSCRITO e comprovante_inscricao esta vazio (NULL ou branco), a mesma chamada com comprovante_inscricao, origem PEDIDO_USUARIO ou EMAIL e evidencia preenche o comprovante, mantem o status e retorna acao COMPROVANTE_REGISTRADO. Se o comprovante ja tem conteudo, ele e imutavel pelo agente: ok=false e acao COMPROVANTE_JA_EXISTENTE, sem alterar o texto. Correcao de comprovante existente e manual, pelo usuario, direto no banco. Nao ha origem que autorize o MCP a substituir. A funcao nao altera observacoes.'),
+   pg_catalog.jsonb_build_object('nome','atualizar_status_vaga','funcao','empregos.mcp_atualizar_status(jsonb)','status_permitidos', pg_catalog.jsonb_build_array('NOVA','ENVIADA','NAO_AVALIADA','INTERESSE','DESCARTADA','INSCRITO','EM_PROCESSO','ENTREVISTA','TESTE_TECNICO','OFERTA','REPROVADO','CONTRATADO','DESCONHECIDA','ATIVA','EXPIRADA'),'regra','Campos: NOTIFICACAO, CANDIDATURA, DISPONIBILIDADE. NOVA para ENVIADA automatica apos comunicar. CANDIDATURA exige origem PEDIDO_USUARIO ou EMAIL e evidencia. EMAIL exige gmail_message_id, email_remetente e email_assunto; essas provas sao declaradas pelo Grok, nao verificadas pelo banco. A mesma mensagem nao justifica outra vaga ou outro status, inclusive quando so registra comprovante. DISPONIBILIDADE permite VERIFICACAO_SITE com evidencia. Se CANDIDATURA ja esta INSCRITO e comprovante_inscricao esta vazio (NULL ou branco), a mesma chamada com comprovante_inscricao, origem PEDIDO_USUARIO ou EMAIL e evidencia preenche o comprovante, mantem o status e retorna acao COMPROVANTE_REGISTRADO. Se o comprovante ja tem conteudo, ele e imutavel pelo agente: ok=false e acao COMPROVANTE_JA_EXISTENTE, sem alterar o texto. Correcao de comprovante existente e manual, pelo usuario, direto no banco. Nao ha origem que autorize o MCP a substituir. A funcao nao altera observacoes.'),
    pg_catalog.jsonb_build_object('nome','descrever_banco','funcao','empregos.mcp_descrever_schema()','regra','Somente leitura de metadados das tabelas empregos.vagas e empregos.vagas_status_hist.')
  )
 );
@@ -317,6 +361,11 @@ $query$;
   GRANT EXECUTE ON FUNCTION empregos.mcp_atualizar_status(JSONB) TO gaq_jobs_grok;
   REVOKE ALL ON FUNCTION empregos.mcp_descrever_schema() FROM PUBLIC;
   GRANT EXECUTE ON FUNCTION empregos.mcp_descrever_schema() TO gaq_jobs_grok;
+  REVOKE ALL ON TABLE empregos.vagas_email_uso FROM PUBLIC;
+  REVOKE ALL ON TABLE empregos.vagas_email_uso FROM gaq_jobs_grok;
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'gaq_jobs_web') THEN
+    REVOKE ALL ON TABLE empregos.vagas_email_uso FROM gaq_jobs_web;
+  END IF;
 END;
 $migracao$;
 

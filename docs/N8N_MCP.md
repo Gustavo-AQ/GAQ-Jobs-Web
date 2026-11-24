@@ -31,7 +31,7 @@ A função de status v2 exige justificativa para mudanças sensíveis com origem
 
 `atualizar_status_vaga` chama `empregos.mcp_atualizar_status(jsonb)`. Além de mudar status, ela trata o comprovante assim:
 
-- Candidatura já `INSCRITO`, com `comprovante_inscricao` vazio (`NULL` ou só espaços): envie `comprovante_inscricao`, origem `PEDIDO_USUARIO` ou `EMAIL` e evidência (mínimo de 12 caracteres; no `EMAIL`, também `gmail_message_id`, `email_remetente` e `email_assunto`). O status permanece `INSCRITO` e a ação volta `COMPROVANTE_REGISTRADO`.
+- Candidatura já `INSCRITO`, com `comprovante_inscricao` vazio (`NULL` ou só espaços): envie `comprovante_inscricao`, origem `PEDIDO_USUARIO` ou `EMAIL` e evidência (mínimo de 12 caracteres; no `EMAIL`, também `gmail_message_id`, `email_remetente` e `email_assunto`). O status permanece `INSCRITO` e a ação volta `COMPROVANTE_REGISTRADO`. Esse `EMAIL` também consome a mensagem: o mesmo `gmail_message_id` não justifica outra vaga nem outro status. O registro fica fora do histórico de status do painel.
 - Comprovante já preenchido: o agente não pode trocá-lo. A função responde `ok=false` e ação `COMPROVANTE_JA_EXISTENTE`, sem gravar. Não há parâmetro de bypass.
 - A coluna `observacoes` não é alterada por essa ferramenta.
 
